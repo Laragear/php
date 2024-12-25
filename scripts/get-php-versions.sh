@@ -14,6 +14,9 @@ extract_minor_version() {
 
 PHP_FILE_VERSIONS="./conf/versions.yaml"
 
+# Ensure the directory exists
+mkdir ./conf
+
 # Fetch the JSON data from the URL
 json_data=$(curl -s https://www.php.net/releases/index.php?json)
 
