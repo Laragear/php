@@ -39,11 +39,11 @@ jobs:
 
       - name: Ensure our PHP Versions file exists.
         run: |
-          if [ ! -f "${{ github.event.inputs.php-versions-file }}" ]; then
+          if [ ! -f "${{ inputs.php-versions-file }}" ]; then
             echo "PHP Versions file does not exist. Exiting."
             exit 1
           else
-            cat ${{ github.event.inputs.php-versions-file }}
+            cat ${{ inputs.php-versions-file }}
           fi
 
       - name: Assemble PHP versions into the matrix.
@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: php-versions.yml
-          path: ${{ github.event.inputs.php-versions-file }}
+          path: ${{ inputs.php-versions-file }}
 
   publish:
     needs: setup-matrix
@@ -94,7 +94,7 @@ jobs:
       # Renames
       # https://github.com/actions/download-artifact
       - name: Move PHP Versions file
-        run: mv ./artifacts/php-versions.yml ${{ inputs.github.event.inputs }}
+        run: mv ./artifacts/php-versions.yml ${{ inputs.php-versions-file }}
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
