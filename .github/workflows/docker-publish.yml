@@ -123,9 +123,8 @@ jobs:
       # https://devtron.ai/blog/dodging-docker-hub-rate-limits-the-ultimate-cheat-code-for-your-ci-cd-pipeline/
       - name: Override Docker registry mirror
         run: |
-          mkdir -p /etc/docker echo '{"registry-mirrors": ["https://mirror.gcr.io"]}' | \
-            sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
+          echo 'DOCKER_OPTS="--registry-mirror=https://mirror.gcr.io"' >> $GITHUB_ENV
+          echo 'BUILDKIT_REGISTRY_MIRRORS={"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}' >> $GITHUB_ENV
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
