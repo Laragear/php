@@ -59,6 +59,6 @@ for version in $filtered_versions; do
         fi
 
          # Add the version to the list
-        echo "- $full_version" >> $PHP_VERSIONS_FILE
+        echo "- '$full_version'" >> $PHP_VERSIONS_FILE
     done
 done
