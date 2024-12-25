@@ -10,19 +10,12 @@ on:
   pull_request:
     branches: [ "1.x" ]
 
-  workflow_call:
-    inputs:
-      php-versions-file:
-        type: string
-        default: 'scripts/conf/versions.yml'
-        description: 'The path to the PHP versions file.'
-
 env:
   # Use docker.io for Docker Hub if empty
-  REGISTRY: docker.io,ghcr.io
+  REGISTRY: docker.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
+  PHP_VERSIONS_FILE: scripts/conf/versions.yml
 
 jobs:
   setup-matrix:
@@ -39,11 +32,11 @@ jobs:
 
       - name: Ensure our PHP Versions file exists.
         run: |
-          if [ ! -f "${{ inputs.php-versions-file }}" ]; then
+          if [ ! -f "${{ env.PHP_VERSIONS_FILE }}" ]; then
             echo "PHP Versions file does not exist. Exiting."
             exit 1
           else
-            cat ${{ inputs.php-versions-file }}
+            cat ${{ env.PHP_VERSIONS_FILE }}
           fi
 
       - name: Assemble PHP versions into the matrix.
@@ -57,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: php-versions.yml
-          path: ${{ inputs.php-versions-file }}
+          path: ${{ env.PHP_VERSIONS_FILE }}
 
   publish:
     needs: setup-matrix
@@ -94,7 +87,7 @@ jobs:
       # Renames
       # https://github.com/actions/download-artifact
       - name: Move PHP Versions file
-        run: mv ./artifacts/php-versions.yml ${{ inputs.php-versions-file }}
+        run: mv ./artifacts/php-versions.yml ${{ env.PHP_VERSIONS_FILE }}
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
