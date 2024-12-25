@@ -12,8 +12,13 @@ extract_minor_version() {
   echo "$version" | cut -d. -f2
 }
 
+PHP_VERSIONS_FILE=${PHP_VERSIONS_FILE:-"./conf/versions.yml"}
+PHP_VERSIONS_FLOOR=${PHP_VERSIONS_FLOOR:-"7"}
+
 # Ensure the directory exists
 mkdir -p ./conf
+
+echo "$PHP_VERSIONS_FILE"
 
 # Fetch the JSON data from the URL
 json_data=$(curl -s https://www.php.net/releases/index.php?json)
@@ -25,9 +30,6 @@ filtered_versions=$( \
         "to_entries | map(select(.key | tonumber >= $PHP_VERSIONS_FLOOR)) | .[].value.version" | \
     sort -V
 )
-
-# Create a very simple YAML where each version will be set
-echo "versions:" > $PHP_VERSIONS_FILE
 
 for version in $filtered_versions; do
     major=$(extract_major_version "$version")
@@ -57,6 +59,6 @@ for version in $filtered_versions; do
         fi
 
          # Add the version to the list
-        echo "  - $full_version" >> $PHP_VERSIONS_FILE
+        echo "- $full_version" >> $PHP_VERSIONS_FILE
     done
 done
