@@ -152,17 +152,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Tag "latest" if the version is the latest
-        uses: docker/build-push-action@v6
-        run: |
-          LATEST_VERSION=$(echo ${{ toJson(matrix.version) }} | jq -r '.[-1]') if [ "${{ matrix.version }}" == "$LATEST_VERSION" ]; then
-            docker tag mydockerhubusername/myapp:${{ matrix.version }}
-            mydockerhubusername/myapp:latest docker tag ghcr.io/mygithubusername/myapp:${{ matrix.version }}
-            ghcr.io/mygithubusername/myapp:latest
-            docker push mydockerhubusername/myapp:latest
-            docker push ghcr.io/mygithubusername/myapp:latest
-          fi
-
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
