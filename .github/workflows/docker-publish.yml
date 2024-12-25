@@ -1,4 +1,4 @@
-name: Docker
+name: Build and Upload to Container Registries
 
 on:
   schedule:
@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [ "1.x" ]
 
-  workflow_call:
+  workflow_trigger:
     inputs:
       php-versions-file:
         type: string
@@ -22,7 +22,6 @@ env:
   REGISTRY: docker.io,ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
 
 jobs:
   setup-matrix:
@@ -49,7 +48,7 @@ jobs:
       - name: Assemble PHP versions into the matrix.
         id: get-php-versions
         run: |
-          MATRIX_JSON=$(yq -o=json scripts/conf/php-versions.yml | jq -c '{include: [(.php_variations[] | {name} ) as $variation | .php_versions[] | .minor_versions[] | .patch_versions[] as $patch | {patch_version: $patch, php_variation: $variation.name}]} | {include: (.include | sort_by(.patch_version | split(".") | map(tonumber) | . as $nums | ($nums[0]*10000 + $nums[1]*100 + $nums[2])) | reverse)}')
+          MATRIX_JSON=$(yq -o=json ${{ inputs.php-versions-file }} | jq -c '{include: [(.php_variations[] | {name} ) as $variation | .php_versions[] | .minor_versions[] | .patch_versions[] as $patch | {patch_version: $patch, php_variation: $variation.name}]} | {include: (.include | sort_by(.patch_version | split(".") | map(tonumber) | . as $nums | ($nums[0]*10000 + $nums[1]*100 + $nums[2])) | reverse)}')
           echo "php-version-map-json=${MATRIX_JSON}" >> $GITHUB_OUTPUT
           echo "${MATRIX_JSON}" | jq '.'
 
