@@ -12,7 +12,7 @@ extract_minor_version() {
   echo "$version" | cut -d. -f2
 }
 
-PHP_FILE_VERSIONS="./conf/versions.yaml"
+PHP_FILE_VERSIONS="./conf/versions.yml"
 
 # Ensure the directory exists
 mkdir ./conf
