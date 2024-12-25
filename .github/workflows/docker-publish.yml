@@ -46,12 +46,6 @@ jobs:
           echo "php-version-map-json=${MATRIX_JSON}" >> $GITHUB_OUTPUT
           echo "${MATRIX_JSON}" | jq '.'
 
-      - name: Upload the php-versions.yml file
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-versions.yml
-          path: ${{ env.PHP_VERSIONS_FILE }}
-
   publish:
     needs: setup-matrix
     runs-on: ubuntu-latest
@@ -76,19 +70,6 @@ jobs:
       - name: Install cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3
-
-      # Download the php file versions map to the job
-      # https://github.com/actions/download-artifact
-      - name: Download PHP Versions file
-        uses: actions/download-artifact@v4
-        with:
-          name: php-versions.yml
-          path: ./artifacts
-
-      # Renames
-      # https://github.com/actions/download-artifact
-      - name: Move PHP Versions file
-        run: mv ./artifacts/php-versions.yml ${{ env.PHP_VERSIONS_FILE }}
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
