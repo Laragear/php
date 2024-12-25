@@ -42,7 +42,7 @@ jobs:
       - name: Assemble PHP versions into the matrix.
         id: get-php-versions
         run: |
-          MATRIX_JSON=$(yq -o=json ${{ env.PHP_VERSIONS_FILE }})
+          MATRIX_JSON=$(yq -o=json ${{ env.PHP_VERSIONS_FILE }} | jq -c)
           echo "php-version-map-json=${MATRIX_JSON}" >> $GITHUB_OUTPUT
           echo "${MATRIX_JSON}" | jq '.'
 
