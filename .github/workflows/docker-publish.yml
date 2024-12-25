@@ -99,7 +99,7 @@ jobs:
       - name: Determine if the version is the latest
         id: check_latest
         run: |
-          VERSIONS_ARRAY=($(echo ${{ toJson(matrix.version) }} | jq -r '.[]' | sort -V))
+          VERSIONS_ARRAY=($(echo ${{ needs.setup-matrix.outputs.php-version-map-json }} | jq -r '.[]' | sort -V))
           LATEST_VERSION=${VERSIONS_ARRAY[-1]}
           if [ "${{ matrix.version }}" == "$LATEST_VERSION" ]; then
             echo "::set-output name=is_latest::true"
