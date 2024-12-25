@@ -124,7 +124,7 @@ jobs:
       - name: Override Docker registry mirror
         run: |
           echo 'DOCKER_OPTS="--registry-mirror=https://mirror.gcr.io"' >> $GITHUB_ENV
-          echo 'BUILDKIT_REGISTRY_MIRRORS={"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}' >> $GITHUB_ENV
+      #    echo 'BUILDKIT_REGISTRY_MIRRORS={"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}' >> $GITHUB_ENV
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
