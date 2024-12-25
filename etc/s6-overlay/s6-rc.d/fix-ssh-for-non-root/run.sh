@@ -5,12 +5,11 @@ SSH_DIR="/ssh"
 SSHD_CONFIG_DIR="$SSH_DIR/sshd_config"
 SSHD_KEYS_DIR="$SSH_DIR/sshd_keys"
 
-# Generate SSH keys for the server
+# Copy the host SSH keys for the server to the new directory
 echo "Ensuring SSH keys exist before starting the SSH Server." > /dev/stdout
+cp --update /etc/ssh/ssh_host_{rsa,ecdsa,ed25519}_key $SSHD_KEYS_DIR/
 
-cp --update=none /etc/ssh/ssh_host_{rsa,ecdsa,ed25519}_key $SSHD_KEYS_DIR/
-
-# Create a minimal sshd_config file
+# Create a minimal sshd_config file if it doesn't exists.
 if [ ! -f $SSHD_CONFIG_DIR/config ]; then
   echo "Setting the default SSH Server configuration" > /dev/stdout
   cat <<EOL > $SSHD_CONFIG_DIR/config
@@ -27,3 +26,6 @@ AcceptEnv LANG LC_*
 EOL
 fi
 
+# Ensure the SSH directory is owned by the user
+echo "Ensuring SSH configuration is owned by $USER" > /dev/stdout
+chown -R $USER:$USER /ssh

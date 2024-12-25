@@ -11,18 +11,21 @@ set_user_password() {
     echo "$1:${USER_PWD}" | chpasswd
 }
 
-# Find user with the given UID
+# Find user name with the given UID
 USER_FOUND=$(getent passwd "$USER_ID" | cut -d: -f1)
 
+# If we found an user for the given ID...
 if [ -n "$USER_FOUND" ]; then
     echo "Changing the '${USER_FOUND}' to '${USER}'" > /dev/stdout
-    # If user exists for the given User ID, change the name and set the home directory with proper permissions
+    # Change the name of the user found for what the developer has set, including its home directory.
     change_user_name_and_home "$USER" "$USER_FOUND"
-    set_user_password "$USER"
 else
     # If user doesn't exist, create a new user with a home directory
     echo "Creating the user '$USER' mapped as '$USER_ID:$GROUP_ID'" > /dev/stdout
     useradd -m -d "/home/$USER" $USER
-    set_user_password "$USER"
     chown -R $USER_ID:$GROUP_ID "/home/$USER"
 fi
+
+# Set the user password to whatever it set
+echo "Setting the '${USER}' password." > /dev/stdout
+set_user_password "$USER"

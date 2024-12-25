@@ -1,3 +1,4 @@
-#!/command/execlineb -P
+#!/command/with-contenv bash
 
-/usr/sbin/sshd -f /ssh/sshd_config/config -D -E /dev/stdout
+exec 2>&1
+exec s6-setuidgid $USER /usr/sbin/sshd -f /ssh/sshd_config/config -D -e

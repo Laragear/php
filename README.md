@@ -1,6 +1,6 @@
 # PHP Container for development
 
-One simple Docker/Podman image for PHP development environments
+Swiss-knife Docker/Podman/Rancher container for PHP development, from PHP 7.0 to latest PHP.
 
 ```shell
 docker run ghcr.io/laragear/php -v ~/projects/my-app:/app:z php -v
@@ -18,7 +18,7 @@ Your support allows me to keep this package free, up-to-date and maintainable.
 
 ## Requirements
 
-* Docker, Podman, or any other OCI runtime.
+* Docker, Podman, Rancher, or any other OCI runtime.
 
 ## Usage
 
@@ -37,7 +37,7 @@ This image includes everything to run in your development environment and then s
 - [Swoole](https://swoole.com/) PHP Extension³
 - [Node](https://nodejs.org/)⁴, [Bun](https://bun.sh/) and [Deno](https://deno.com/)
 - [NPM](https://www.npmjs.com/), [Yarn](https://yarnpkg.com/)⁴ and [PNPM](https://pnpm.io/)⁴
-- [MySQL](https://dev.mysql.com/downloads/shell/) and [PostgreSQL](https://www.postgresql.org/docs/current/app-psql.html) CLI clients
+- [MySQL](https://dev.mysql.com/downloads/shell/), [PostgreSQL](https://www.postgresql.org/docs/current/app-psql.html) CLI clients
 - SSH Server (rootless)
 
 > [!NOTE]

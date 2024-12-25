@@ -1,10 +1,5 @@
 name: Docker
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 on:
   schedule:
     - cron: '0 7 * * 2,4'
@@ -15,17 +10,62 @@ on:
   pull_request:
     branches: [ "1.x" ]
 
+  workflow_call:
+    inputs:
+      php-versions-file:
+        type: string
+        default: 'scripts/conf/versions.yml'
+        description: 'The path to the PHP versions file.'
+
 env:
   # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
+  REGISTRY: docker.io,ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
 
 jobs:
-  build:
-
+  setup-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      php-version-map-json: ${{ steps.get-php-versions.outputs.php-version-map-json }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Prepare PHP versions for the matrix.
+        run: ./scripts/get-php-versions.sh
+
+      - name: Ensure our PHP Versions file exists.
+        run: |
+          if [ ! -f "${{ inputs.php-versions-file }}" ]; then
+            echo "PHP Versions file does not exist. Exiting."
+            exit 1
+          else
+            cat ${{ inputs.php-versions-file }}
+          fi
+
+      - name: Assemble PHP versions into the matrix.
+        id: get-php-versions
+        run: |
+          MATRIX_JSON=$(yq -o=json scripts/conf/php-versions.yml | jq -c '{include: [(.php_variations[] | {name} ) as $variation | .php_versions[] | .minor_versions[] | .patch_versions[] as $patch | {patch_version: $patch, php_variation: $variation.name}]} | {include: (.include | sort_by(.patch_version | split(".") | map(tonumber) | . as $nums | ($nums[0]*10000 + $nums[1]*100 + $nums[2])) | reverse)}')
+          echo "php-version-map-json=${MATRIX_JSON}" >> $GITHUB_OUTPUT
+          echo "${MATRIX_JSON}" | jq '.'
+
+      - name: Upload the php-versions.yml file
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-versions.yml
+          path: ${{ inputs.php-versions-file }}
+
+  publish:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix: ${{fromJson(needs.setup-matrix.outputs.php-version-map-json)}}
+
     permissions:
       contents: read
       packages: write
@@ -42,8 +82,19 @@ jobs:
       - name: Install cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3
+
+      # Download the php file versions map to the job
+      # https://github.com/actions/download-artifact
+      - name: Download PHP Versions file
+        uses: actions/download-artifact@v4
         with:
-          cosign-release: 'v2.2.4'
+          name: php-versions.yml
+          path: ./artifacts
+
+      # Renames
+      # https://github.com/actions/download-artifact
+      - name: Move PHP Versions file
+        run: mv ./artifacts/php-versions.yml ${{ inputs.php-versions-file }}
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
@@ -53,13 +104,21 @@ jobs:
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
+      - name: Log into GitHub Container Registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghrc.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action

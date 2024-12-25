@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ "$1" -eq 0 ]; then
+  s6-svc -O .  # Do not restart if the exit code is 0
+fi
