@@ -132,8 +132,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v6
         with:
-          build-args: |
-            BUILDKIT_REGISTRY_MIRRORS='{"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}'
+          # build-args: |
+          #  BUILDKIT_REGISTRY_MIRRORS='{"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}'
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
