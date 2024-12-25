@@ -82,7 +82,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          registry: ghrc.io
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -132,8 +132,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v6
         with:
-          # build-args: |
-          #  BUILDKIT_REGISTRY_MIRRORS='{"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}'
+          build-args: |
+            BUILDKIT_REGISTRY_MIRRORS='{"docker.io": {"mirrors": ["https://mirror.gcr.io"]}}'
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
