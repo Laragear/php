@@ -113,8 +113,9 @@ jobs:
         with:
           images: ghcr.io/${{ env.IMAGE_NAME }}
           tags: |
+            type=ref,event=branch
             type=ref,event=pr
-            type=raw,value={{ matrix.version }}
+            type=raw,value=${{ matrix.version }}
             ${{ steps.check_latest.outputs.is_latest == 'true' && 'type=raw,value=latest' || '' }}
 
       # Build and push Docker image with Buildx (don't push on PR)
