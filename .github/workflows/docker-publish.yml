@@ -113,6 +113,18 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      # Check if is the current version is the latest
+      - name: Determine if the version is the latest
+        id: check_latest
+        run: |
+          VERSIONS_ARRAY=($(echo ${{ toJson(matrix.version) }} | jq -r '.[]' | sort -V))
+          LATEST_VERSION=${VERSIONS_ARRAY[-1]}
+          if [ "${{ matrix.version }}" == "$LATEST_VERSION" ]; then
+            echo "::set-output name=is_latest::true"
+          else
+            echo "::set-output name=is_latest::false"
+          fi
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -125,7 +137,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            ${{ steps.check_latest.outputs.is_latest == 'true' && 'type=raw,value=latest' || '' }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -139,6 +151,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Tag "latest" if the version is the latest
+        uses: docker/build-push-action@v6
+        run: |
+          LATEST_VERSION=$(echo ${{ toJson(matrix.version) }} | jq -r '.[-1]') if [ "${{ matrix.version }}" == "$LATEST_VERSION" ]; then
+            docker tag mydockerhubusername/myapp:${{ matrix.version }}
+            mydockerhubusername/myapp:latest docker tag ghcr.io/mygithubusername/myapp:${{ matrix.version }}
+            ghcr.io/mygithubusername/myapp:latest
+            docker push mydockerhubusername/myapp:latest
+            docker push ghcr.io/mygithubusername/myapp:latest
+          fi
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
