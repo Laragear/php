@@ -1,31 +1,29 @@
 #!/usr/bin/env bash
 
-# Function to change user's name and set home directory permissions
-change_user_name_and_home() {
-    usermod -l "$1" -d "/home/$1" -m "$2"
-    chown -R "$1:$1" "/home/$1"
-}
+# Check if the USER_ID already exists
+if id -u $USER_ID >/dev/null 2>&1; then
+    EXISTING_USER=$(getent passwd $USER_ID | cut -d: -f1)
 
-# Function to set user's password
-set_user_password() {
-    echo "$1:${USER_PWD}" | chpasswd
-}
-
-# Find user name with the given UID
-USER_FOUND=$(getent passwd "$USER_ID" | cut -d: -f1)
-
-# If we found an user for the given ID...
-if [ -n "$USER_FOUND" ]; then
-    echo "Changing the '${USER_FOUND}' to '${USER}'" > /dev/stdout
-    # Change the name of the user found for what the developer has set, including its home directory.
-    change_user_name_and_home "$USER" "$USER_FOUND"
+    if [ "$EXISTING_USER" != "$USER" ]; then
+        echo "Changing the '$EXISTING_USER' user to '$USER' to." > /dev/stdout
+        # Move the home directory of the existing user
+        usermod -l $USER -d /home/$USER -m $EXISTING_USER
+    fi
 else
-    # If user doesn't exist, create a new user with a home directory
-    echo "Creating the user '$USER' mapped as '$USER_ID:$GROUP_ID'" > /dev/stdout
-    useradd -m -d "/home/$USER" $USER
-    chown -R $USER_ID:$GROUP_ID "/home/$USER"
+    # Check if the USER exists
+    if id -u $USER >/dev/null 2>&1; then
+        echo "Adjusting '$USER' permissions to '$USER:$GROUP_ID'." > /dev/stdout
+        # Adjust home directory permissions to the new USER_ID and GROUP_ID
+        chown -R $USER_ID:$GROUP_ID /home/$USER
+    else
+        echo "Adding '$USER' as '$USER:$GROUP_ID' to the container." > /dev/stdout
+        # Create a new user with the specified USER_ID and GROUP_ID
+        useradd -u $USER_ID -g $GROUP_ID -m -d /home/$USER $USER
+        # Add a symlink to the application directory
+        ln -s /app /home/$USER/project
+    fi
 fi
 
 # Set the user password to whatever it set
-echo "Setting the '${USER}' password." > /dev/stdout
-set_user_password "$USER"
+echo "Setting the '$USER' password." > /dev/stdout
+echo "$USER:$USER_PWD" | chpasswd
