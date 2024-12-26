@@ -19,8 +19,8 @@ FROM php:${PHP_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
-ARG USER_PWD="dev"
-ENV USER="dev"
+ENV USER_PWD="developer"
+ENV USER="developer"
 ENV USER_ID=1000
 ENV GROUP_ID=1000
 
