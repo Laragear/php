@@ -1,0 +1,23 @@
+{
+    "name": "Laragear Development Environment for PHP",
+    "image": "laragear/php",
+    "workspaceFolder": "/app",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                 "vscode-laravel",
+                // "mikestead.dotenv",
+                // "amiralizadeh9480.laravel-extra-intellisense",
+                // "ryannaddy.laravel-artisan",
+                // "onecentlin.laravel5-snippets",
+                // "onecentlin.laravel-blade"
+            ],
+            "settings": {}
+        },
+        "jetbrains": {
+            "backend" : "PhpStorm",
+        }
+    },
+    "remoteUser": "dev",
+    "postCreateCommand": "chown -R 1000:1000 /app 2>/dev/null || true"
+}
