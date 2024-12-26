@@ -28,4 +28,4 @@ fi
 
 # Ensure the SSH directory is owned by the user
 echo "Ensuring SSH configuration is owned by $USER" > /dev/stdout
-chown -R $USER:$USER /ssh
+chown -R $USER_ID:$GROUP_ID /ssh
