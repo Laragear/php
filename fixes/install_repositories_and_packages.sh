@@ -134,7 +134,7 @@ apt-get install -y --no-install-recommends \
     mysql-shell \
     mariadb-client \
     $POSTGRESQL_CLIENT \
-    mongodb-atlas-cli \
+    mongocli \
     sqlite3
 
 # Clean installation leftovers
