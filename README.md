@@ -1,6 +1,6 @@
 # PHP Container for development
 
-Swiss-knife Docker/Podman/Rancher container for PHP development, from PHP 7.0 to latest PHP.
+Swiss-knife Docker/Podman/Rancher container for PHP development, from PHP 5.6 to the latest versions.
 
 ```shell
 docker run laragear/php -v ~/projects/my-app:/app php -v
