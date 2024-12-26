@@ -9,16 +9,38 @@ extract_major_version() {
 # Function to extract the minor version
 extract_minor_version() {
   version="$1"
-  echo "$version" | cut -d. -f2
+  echo "$version" | cut -d. -f2 || "0"
+}
+
+# Function to compare versions
+compare_versions() {
+  # Normalize versions
+  local version1=$(echo "$1" | awk -F. '{ print $1"."($2?$2:0)"."($3?$3:0) }')
+  local version2=$(echo "$2" | awk -F. '{ print $1"."($2?$2:0)"."($3?$3:0) }')
+
+  # Split versions into components
+  IFS='.' read -r -a v1 <<< "$version1"
+  IFS='.' read -r -a v2 <<< "$version2"
+
+  # Compare each component
+  for i in {0..2}; do
+    if (( v1[i] < v2[i] )); then
+      return 0 # version1 is less than version2
+    elif (( v1[i] > v2[i] )); then
+      return 1 # version1 is greater than or equal to version2
+    fi
+  done
+
+  return 1 # versions are equal
 }
 
 PHP_VERSIONS_FILE=${PHP_VERSIONS_FILE:-"./conf/versions.yml"}
-PHP_VERSIONS_FLOOR=${PHP_VERSIONS_FLOOR:-"7"}
+PHP_VERSION_MIN=${PHP_VERSION_MIN:-"5.6"}
 
 # Ensure the directory exists
 mkdir -p ./conf
 
-echo "$PHP_VERSIONS_FILE"
+rm "$PHP_VERSIONS_FILE"
 
 # Fetch the JSON data from the URL
 json_data=$(curl -s https://www.php.net/releases/index.php?json)
@@ -27,17 +49,21 @@ json_data=$(curl -s https://www.php.net/releases/index.php?json)
 filtered_versions=$( \
     echo "$json_data" | \
     jq -r \
-        "to_entries | map(select(.key | tonumber >= $PHP_VERSIONS_FLOOR)) | .[].value.version" | \
-    sort -V
+        "to_entries | map(select(.key | tonumber)) | .[].value.version" | \
+    sort -V  | \
+    sed 's/[^0-9]/ /g' | \
+    awk '{ print $1"."($2?$2:0)"."($3?$3:0) }'
 )
+
+echo $filtered_versions
 
 for version in $filtered_versions; do
     major=$(extract_major_version "$version")
     latest_minor=$(extract_minor_version "$version")
 
     for ((minor=0; minor<=latest_minor; minor++)); do
-        # Do not go below v7.0
-        if [[ "$major" -lt 7 ]]; then
+        # Do not go below the minimum version
+        if compare_versions "$major.$minor" "$PHP_VERSION_MIN"; then
             continue
         fi
 
