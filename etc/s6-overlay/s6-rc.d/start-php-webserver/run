@@ -12,7 +12,7 @@ if [ -f "/app/composer.json" ]; then
   # Check if it's a laravel project and run Artisan Serve.
   elif jq -e '.require["laravel/framework"]' /app/composer.json > /dev/null; then
     echo "Executing Laravel Server" > /dev/stdout
-    exec s6-setuidgid $USER /usr/bin/php /app/artisan serve --port=80 --address=0.0.0.0
+    exec s6-setuidgid $USER /usr/local/bin/php /app/artisan serve --port=80 --address=0.0.0.0
   fi
 fi
 
@@ -20,13 +20,13 @@ fi
 if [ -f "/app/public/index.php" ]; then
   # Execute the project manually
   echo "Executing PHP Built-in Server on /app/public" > /dev/stdout
-  exec s6-setuidgid $USER /usr/bin/php -S 0.0.0.0:80 -t /app/public /app/public/index.php
+  exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t /app/public /app/public/index.php
 fi
 
 # If the directory is not empty, then just run it.
 if [ "$(ls -A /app)" ]; then
   echo "Executing PHP Built-in Server on /app" > /dev/stdout
-  exec s6-setuidgid $USER /usr/bin/php -S 0.0.0.0:80 -t /app
+  exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t /app
 fi
 
 # Exit since there is nothing to server
