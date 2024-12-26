@@ -130,10 +130,10 @@ jobs:
             ${{ env.IMAGE_NAME }}
             ghcr.io/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
             type=ref,event=pr
             type=raw,value=${{ matrix.version }}
             ${{ steps.check_latest.outputs.is_latest == 'true' && 'type=raw,value=latest' || '' }}
+            ${{ steps.check_latest.outputs.is_latest == 'true' && 'type=ref,event=branch' || '' }}
           flavor:
             latest=false
 
