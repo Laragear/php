@@ -23,8 +23,8 @@ if [ -f "/app/public/index.php" ]; then
   exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t /app/public /app/public/index.php
 fi
 
-# If the directory is not empty, then just run it.
-if [ "$(ls -A /app)" ]; then
+# If the directory is not empty, and with at least a single php file.
+if ls /app/*.php 1> /dev/null 2>&1; then
   echo "Executing PHP Built-in Server on /app" > /dev/stdout
   exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t /app
 fi
