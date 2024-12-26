@@ -77,20 +77,14 @@ COPY --from=deno-image          /usr/bin/deno               /usr/local/bin/deno
 COPY --from=bun-image           /usr/local/bin/bun          /usr/local/bin/bun
 COPY --from=composer-image      /usr/bin/composer           /usr/local/bin/composer
 
-#
-#--------------------------------------------------------------------------
-# Fixes
-#--------------------------------------------------------------------------
-#
-
-# Copy scripts for fixes that we will use along the image creation.
-COPY ./fixes /var/fixes
 
 #
 #--------------------------------------------------------------------------
 # Package Manager - Switch to reachable repository
 #--------------------------------------------------------------------------
 #
+
+COPY ./fixes/set_old_repository.sh /var/fixes/set_old_repository.sh
 
 RUN /var/fixes/set_old_repository.sh
 
@@ -142,6 +136,7 @@ RUN \
 #--------------------------------------------------------------------------
 #
 
+COPY ./fixes/install_repositories_and_packages.sh /var/fixes/install_repositories_and_packages.sh
 RUN /var/fixes/install_repositories_and_packages.sh
 
 #
@@ -210,9 +205,30 @@ RUN \
 
 #
 #--------------------------------------------------------------------------
+# Install S6 Overlay
+#--------------------------------------------------------------------------
+#
+# @see https://github.com/just-containers/s6-overlay
+#
+
+COPY ./fixes/install_s6_overlay.sh /var/fixes/install_s6_overlay.sh
+RUN /var/fixes/install_s6_overlay.sh
+
+# Copy the S6 Configuration files to the container.
+COPY etc /etc
+
+# Set the entrypoint to S6 OVerlay custom INIT.
+ENTRYPOINT ["/init"]
+
+#
+#--------------------------------------------------------------------------
 # User - Preparation
 #--------------------------------------------------------------------------
 #
+
+COPY ./fixes/set_user.sh /var/fixes/set_user.sh
+
+RUN /var/fixes/set_user.sh
 
 RUN \
     echo "Creating symlinks for the '/app' directory" > /dev/stdout && \
@@ -220,10 +236,9 @@ RUN \
     mkdir /app && \
     mkdir -p /var/www && \
     mkdir -p /opt && \
-    mkdir -p /home/${USER} && \
+    mkdir -p /home/$USER && \
     ln -s /app /var/www/html && \
     ln -s /app /opt/project && \
-    ln -s /app /home/${USER}/project && \
     # Ensure these path have the correct permissions for the dev user.
     chown $USER_ID:$GROUP_ID /app && \
     chown $USER_ID:$GROUP_ID /var/www/html && \
@@ -265,22 +280,6 @@ RUN \
 
 #
 #--------------------------------------------------------------------------
-# Install S6 Overlay
-#--------------------------------------------------------------------------
-#
-# @see https://github.com/just-containers/s6-overlay
-#
-
-RUN /var/fixes/install_s6_overlay.sh
-
-# Copy the S6 Configuration files to the container.
-COPY etc /etc
-
-# Set the entrypoint to S6 OVerlay custom INIT.
-ENTRYPOINT ["/init"]
-
-#
-#--------------------------------------------------------------------------
 # Common fixes
 #--------------------------------------------------------------------------
 #
@@ -294,7 +293,5 @@ RUN \
 # Make the container ready to use
 #--------------------------------------------------------------------------
 #
-
-RUN /var/fixes/set_user.sh
 
 WORKDIR /app
