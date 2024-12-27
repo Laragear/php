@@ -165,21 +165,25 @@ RUN \
     echo 'Installing Node' > /dev/stdout && \
     apt-get install -y --no-install-recommends nodejs && \
     # Enable Corepack
-    echo 'Enabling Corepack' > /dev/stdout && \
-    corepack enable && \
-    # Enable NPM \
-    echo 'Installing NPM via Corepack' > /dev/stdout && \
-    corepack install --global npm && \
-    # Enable Yarn
-    echo 'Installing Yarn via Corepack' > /dev/stdout && \
-    corepack install --global yarn && \
-    # Yarn smoke test
-    yarn -v && \
-    # Enable PNPM
-    echo 'Installing PNPM via Corepack' > /dev/stdout && \
-    corepack install --global pnpm && \
-    # PNPM smoke test
-    pnpm -v && \
+    if [ -f '/usr/bin/corepack' ]; then \
+        echo 'Enabling Corepack' > /dev/stdout && \
+        corepack enable && \
+        # Enable NPM \
+        echo 'Installing NPM via Corepack' > /dev/stdout && \
+        corepack install --global npm && \
+        # Enable Yarn
+        echo 'Installing Yarn via Corepack' > /dev/stdout && \
+        corepack install --global yarn && \
+        # Yarn smoke test
+        yarn -v && \
+        # Enable PNPM
+        echo 'Installing PNPM via Corepack' > /dev/stdout && \
+        corepack install --global pnpm && \
+        # PNPM smoke test
+        pnpm -v; \
+    else \
+      echo 'This version of Debian does not support Node Corepack' > /dev/stdout; \
+    fi && \
     # Clean installation leftovers
     apt-get -y autoremove && \
     apt-get clean && \
@@ -191,10 +195,15 @@ RUN \
 #--------------------------------------------------------------------------
 #
 
+# Ensure all runtimes have access to privileged ports belo 1024 (like 22, 80 or 443)
 RUN \
     echo "Ensuring all runtimes have access to low-end port numbers" > /dev/stdout && \
-    # Ensure all runtimes have access to privileged ports belo 1024 (like 22, 80 or 443)
-    setcap "cap_net_bind_service=+ep" /usr/bin/node && \
+    # Old Node sometimes installs itself has "nodejs", so use that if "node" doesn't exists.
+    if [ -f /usr/bin/node ]; then \
+      setcap "cap_net_bind_service=+ep" /usr/bin/node; \
+    elif [ -f /usr/bin/nodejs ]; then \
+      setcap "cap_net_bind_service=+ep" /usr/bin/nodejs; \
+    fi && \
     setcap "cap_net_bind_service=+ep" /usr/sbin/sshd && \
     setcap "cap_net_bind_service=+ep" /usr/local/bin/rr && \
     setcap "cap_net_bind_service=+ep" /usr/local/bin/bun && \
