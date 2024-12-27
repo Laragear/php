@@ -33,6 +33,12 @@ else
   echo "NODE_VERSION is already set to: $NODE_VERSION" > /dev/stdout
 fi
 
+# Break out on EOL Debian since barely anything will work except from Node, barely.
+if grep -q "archive.debian.org" "/etc/apt/sources.list"; then
+    echo "Database tools are not supported on EOL Debian $CURRENT_OS_CODENAME. Install them separately." > /dev/stdout
+    exit 0
+fi
+
 MYSQL_REPO_VERSION="innovation"
 
 # Check if MYSQL_VERSION is empty or set to "latest"
@@ -92,7 +98,7 @@ mkdir -p /etc/apt/keyrings
 # Node Repository
 echo "Adding Node Repository" > /dev/stdout
 curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/node.gpg
-echo "deb [signed-by=/etc/apt/keyrings/node.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/node.list
+echo "deb [signed-by=/etc/apt/keyrings/node.gpg] http://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/node.list
 
 # MySQL Repository
 echo "Adding MySQL Repository" > /dev/stdout
@@ -100,14 +106,19 @@ curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr
 echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ ${CURRENT_OS_CODENAME} mysql-${MYSQL_REPO_VERSION}" > /etc/apt/sources.list.d/mysql.list
 
 # MariaDB Repository
-echo "Adding MariaDB Repository" > /dev/stdout
-curl -fsSL https://mariadb.org/mariadb_release_signing_key.pgp | gpg --dearmor -o /usr/share/keyrings/mariadb.gpg
-echo "deb [signed-by=/usr/share/keyrings/mariadb.gpg] https://deb.mariadb.org/${MARIADB_VERSION}/debian ${CURRENT_OS_CODENAME} main" > /etc/apt/sources.list.d/mariadb.list
+# Find if there the distro version is available for MariaDB. If not, bail out.
+if curl -s --head "http://mirror.mariadb.org/repo/${MARIADB_VERSION}/debian/dists/${CURRENT_OS_CODENAME}/" | grep "200 OK" > /dev/null; then
+    echo "Adding MariaDB Repository" > /dev/stdout
+    curl -fsSL https://mariadb.org/mariadb_release_signing_key.pgp | gpg --dearmor -o /usr/share/keyrings/mariadb.gpg
+    echo "deb [signed-by=/usr/share/keyrings/mariadb.gpg] http://deb.mariadb.org/${MARIADB_VERSION}/debian ${CURRENT_OS_CODENAME} main" > /etc/apt/sources.list.d/mariadb.list
+else
+    echo "No repository for ${CURRENT_OS_CODENAME} for MariaDB ${MARIADB_VERSION}, not using mariadb client."
+fi
 
 POSTGRESQL_CLIENT="postgresql-client"
 
 # If the {CODENAME} repository exists, add it.
-if curl -s --head "https://apt.postgresql.org/pub/repos/apt/dists/${CURRENT_OS_CODENAME}-pgdg" | grep "200 OK" > /dev/null; then
+if curl -s --head "http://apt.postgresql.org/pub/repos/apt/dists/${CURRENT_OS_CODENAME}-pgdg" | grep "200 OK" > /dev/null; then
     # PostgreSQL Repository
     echo "Adding PostgreSQL Repository" > /dev/stdout
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
@@ -122,7 +133,7 @@ fi
 # MongoDB Repository
 echo "Adding MongoDB Repository" > /dev/stdout
 curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb.gpg
-echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] https://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
+echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
 
 echo "Installing Database Clients" > /dev/stdout
 
