@@ -12,7 +12,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   PHP_VERSIONS_FILE: "scripts/conf/versions.yml"
-  PHP_VERSION_MIN: "7.0"
+  PHP_VERSION_MIN: "5.6"
 
 jobs:
   setup-matrix:
