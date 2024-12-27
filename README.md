@@ -47,7 +47,7 @@ This image includes everything to run in your development environment and then s
 - [RoadRunner](https://roadrunner.dev/)²
 - [Node](https://nodejs.org/)⁴, [Bun](https://bun.sh/) and [Deno](https://deno.com/)
 - [NPM](https://www.npmjs.com/)³, [Yarn](https://yarnpkg.com/)³ and [PNPM](https://pnpm.io/)³
-- Database Clients for [MySQL](https://dev.mysql.com/downloads/shell/), [PostgreSQL](https://www.postgresql.org/docs/current/app-psql.html), [MariaDB](https://mariadb.com/docs/server/connect/clients/mariadb-client/), [SQLite](https://sqlite.org/cli.html) and [MongoDB](https://www.mongodb.com/docs/mongocli/).
+- Database Clients for [MySQL](https://dev.mysql.com/downloads/shell/), [PostgreSQL](https://www.postgresql.org/docs/current/app-psql.html), [MariaDB](https://mariadb.com/docs/server/connect/clients/mariadb-client/), [SQLite](https://sqlite.org/cli.html) and [MongoDB](https://www.mongodb.com/docs/mongocli/)⁴.
 - SSH Server (rootless)
 
 > [!NOTE]
@@ -56,7 +56,9 @@ This image includes everything to run in your development environment and then s
 >
 > ²: RoadRunner is only compatible with PHP 8.0 onwards.
 >
-> ³: Installed as part of [Corepack](https://nodejs.org/api/corepack.html).
+> ³: Installed as part of [Corepack](https://nodejs.org/api/corepack.html) on supported Debian versions (10+).
+> 
+> ⁴: Not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
  
 ## Tags
 
@@ -77,7 +79,7 @@ Laragear PHP is built for PHP 7.0 onwards. Debian versions depend on the PHP ver
 
 > [!WARNING]
 > 
-> Unsupported (EOL) PHP Versions may not work properly. Be sure to always stay up to date.
+> [Unsupported PHP Versions](https://www.php.net/supported-versions.php) may not work properly. Be sure to always stay up to date.
 
 ### DevContainer
 
