@@ -115,9 +115,9 @@ jobs:
           VERSIONS_ARRAY=($(echo ${{ needs.setup-matrix.outputs.php-version-map-json }} | jq -r '.[]' | sort -V))
           LATEST_VERSION=${VERSIONS_ARRAY[-1]}
           if [ "${{ matrix.version }}" == "$LATEST_VERSION" ]; then
-            echo "::set-output name=is_latest::true"
+            echo "is_latest=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=is_latest::false"
+            echo "is_latest=false" >> $GITHUB_OUTPUT
           fi
 
       # Extract metadata (tags, labels) for Docker
