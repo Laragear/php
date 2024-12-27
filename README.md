@@ -1,6 +1,6 @@
 # PHP Container for development
 
-Swiss-knife Docker/Podman/Rancher container for PHP development, from PHP 5.6 to the latest versions.
+Swiss-knife Docker/Podman/Rancher container for PHP development, from PHP 7.0 to the latest versions.
 
 ```shell
 docker run laragear/php -v ~/projects/my-app:/app php -v
@@ -60,21 +60,20 @@ This image includes everything to run in your development environment and then s
  
 ## Tags
 
-Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP version you're using, as this image is based on the [official PHP Image from Docker](https://github.com/docker-library/php). These images will always use the latest Debian version available.
+Laragear PHP is built for PHP 7.0 onwards. Debian versions depend on the PHP version you're using, as this image is based on the [official PHP Image from Docker](https://github.com/docker-library/php). These images will always use the latest Debian version available.
 
-| Tags                 | PHP Version | Debian Version                                           |
-|----------------------|-------------|----------------------------------------------------------|
-| `8.4` `latest` `1.x` | `8.4`       | [`11.0` Stretch](https://wiki.debian.org/DebianBookworm) |
-| `8.3`                | `8.3`       | [`11.0` Stretch](https://wiki.debian.org/DebianBookworm) |
-| `8.2`                | `8.2`       | [`11.0` Stretch](https://wiki.debian.org/DebianBookworm) |
-| `8.1`                | `8.1`       | [`11.0` Stretch](https://wiki.debian.org/DebianBookworm) |
-| `8.0`                | `8.0`       | [`11.0` Stretch](https://wiki.debian.org/DebianBullseye) |
-| `7.4`                | `7.4`       | [`11.0` Stretch](https://wiki.debian.org/DebianBullseye) |
-| `7.3`                | `7.3`       | [`11.0` Stretch](https://wiki.debian.org/DebianBullseye) |
-| `7.2`                | `7.2`       | [`10.0` Stretch](https://wiki.debian.org/DebianBuster)   |
-| `7.1`                | `7.1`       | [`10.0` Stretch](https://wiki.debian.org/DebianBuster)   |
-| `7.0`                | `7.0`       | [` 9.0` Stretch](https://wiki.debian.org/DebianStretch)  |
-| `5.6`                | `5.6`       | [` 9.0` Stretch](https://wiki.debian.org/DebianStretch)  |
+| Tags                 | PHP Version | Debian Version                                            |
+|----------------------|-------------|-----------------------------------------------------------|
+| `8.4` `latest` `1.x` | `8.4`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.3`                | `8.3`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.2`                | `8.2`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.1`                | `8.1`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.0`                | `8.0`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
+| `7.4`                | `7.4`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
+| `7.3`                | `7.3`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
+| `7.2`                | `7.2`       | [`10.0` Buster](https://wiki.debian.org/DebianBuster)     |
+| `7.1`                | `7.1`       | [`10.0` Buster](https://wiki.debian.org/DebianBuster)     |
+| `7.0`                | `7.0`       | [` 9.0` Stretch](https://wiki.debian.org/DebianStretch)   |
 
 > [!WARNING]
 > 
