@@ -1,0 +1,3 @@
+#!/command/execlineb -P
+
+/command/with-contenv /var/fixes/set_symlinks.sh

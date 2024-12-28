@@ -1,35 +1,33 @@
 #!/command/with-contenv bash
 
-exec 2>&1
-
 # If the project is composer-based
-if [ -f "/app/composer.json" ]; then
+if [ -f "$PROJECT_PATH/composer.json" ]; then
   # Check if the script uses a "dev" script and run it.
-  if jq -e '.scripts.dev | type == "array"' /app/composer.json > /dev/null; then
-    cd /app
+  if jq -e '.scripts.dev | type == "array"' $PROJECT_PATH/composer.json > /dev/null; then
+    cd $PROJECT_PATH
     echo "Executing composer.json 'dev' script" > /dev/stdout
-    exec s6-setuidgid $USER /usr/local/sbin/composer /app/composer.json run dev
+    exec s6-setuidgid $USER /usr/local/sbin/composer $PROJECT_PATH/composer.json run dev
   # Check if it's a laravel project and run Artisan Serve.
-  elif jq -e '.require["laravel/framework"]' /app/composer.json > /dev/null; then
+  elif jq -e '.require["laravel/framework"]' $PROJECT_PATH/composer.json > /dev/null; then
     echo "Executing Laravel Server" > /dev/stdout
-    exec s6-setuidgid $USER /usr/local/bin/php /app/artisan serve --port=80 --address=0.0.0.0
+    exec s6-setuidgid $USER /usr/local/bin/php $PROJECT_PATH/artisan serve --port=80 --address=0.0.0.0
   fi
 fi
 
 # If there is a web server public file
-if [ -f "/app/public/index.php" ]; then
+if [ -f "$PROJECT_PATH/public/index.php" ]; then
   # Execute the project manually
-  echo "Executing PHP Built-in Server on /app/public" > /dev/stdout
-  exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t /app/public /app/public/index.php
+  echo "Executing PHP Built-in Server on $PROJECT_PATH/public" > /dev/stdout
+  exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t $PROJECT_PATH/public $PROJECT_PATH/public/index.php
 fi
 
 # If the directory is not empty, and with at least a single php file.
-if ls /app/*.php 1> /dev/null 2>&1; then
-  echo "Executing PHP Built-in Server on /app" > /dev/stdout
-  exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t /app
+if ls $PROJECT_PATH/*.php 1> /dev/null 2>&1; then
+  echo "Executing PHP Built-in Server on $PROJECT_PATH" > /dev/stdout
+  exec s6-setuidgid $USER /usr/local/bin/php -S 0.0.0.0:80 -t $PROJECT_PATH
 fi
 
 # Exit since there is nothing to server
-echo "No project mounted in /app to run a web server" > /dev/stdout
+echo "No project mounted in '$PROJECT_PATH' to run a web server" > /dev/stdout
 
 exit 0
