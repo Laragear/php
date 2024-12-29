@@ -289,7 +289,19 @@ RUN \
 RUN \
     echo "Ensure Composer directory is '$COMPOSER_HOME' and the cache is '$COMPOSER_CACHE_DIR'" > /dev/stdout && \
     mkdir ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} && \
-    chown ${USER_ID}:${GROUP_ID} -R /composer
+    chown ${USER_ID}:${GROUP_ID} -R /composer \
+
+# Let's also add some common composer utilities globally.
+RUN \
+    echo "Adding some useful Composer packages globally" > /dev/stdout && \
+    /usr/local/bin/composer --no-cache --global require \
+      laravel/pint \
+      phpunit/phpunit && \
+    # Clear composer cache and keep the image size lean
+    composer clear-cache
+
+# Add Composer binary directory to the global path
+ENV PATH $PATH:"/composer/vendor/bin"
 
 #
 #--------------------------------------------------------------------------
