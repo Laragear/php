@@ -309,13 +309,7 @@ RUN \
 
 WORKDIR /app
 
-COPY ./entrypoint.sh /entrypoint.sh
-
-# USER $USER
-
 # Set the entrypoint to S6 OVerlay custom INIT.
-ENTRYPOINT ["/init", "/command/with-contenv", "/entrypoint.sh"]
+ENTRYPOINT ["/init"]
 
 CMD ["/bin/bash"]
-
-# RUN mkdir /run/sshd
