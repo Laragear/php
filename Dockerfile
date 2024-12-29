@@ -36,7 +36,10 @@ ARG POSTGRESQL_VERSION="latest"
 ARG MONGODB_VERSION="latest"
 
 ENV COMPOSER_HOME="/composer"
-ENV COMPOSER_CACHE_DIR="/composer/cache"
+ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
+ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
+
+ENV PATH $PATH:$COMPOSER_BIN_DIR
 
 ARG S6-VERSION="latest"
 
@@ -299,9 +302,6 @@ RUN \
       phpunit/phpunit && \
     # Clear composer cache and keep the image size lean
     composer clear-cache
-
-# Add Composer binary directory to the global path
-ENV PATH $PATH:"/composer/vendor/bin"
 
 #
 #--------------------------------------------------------------------------
