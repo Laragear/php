@@ -79,7 +79,7 @@ jobs:
 
       - name: Check images were pulled from Docker
         run: |
-          if [-d "docker_images" ] && [ "$(ls -A docker_images)" ]; then
+          if [ -d "docker_images" ] && [ "$(ls -A docker_images)" ]; then
             echo "These are the Docker tarballs to cache:"
             ls -l docker_images
           else
