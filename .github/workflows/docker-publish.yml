@@ -81,7 +81,7 @@ jobs:
         run: |
           if [ -d "docker_images" ] && [ "$(ls -A docker_images)" ]; then
             echo "These are the Docker tarballs to cache:"
-            ls -1 docker_images
+            echo $(ls -1 "docker_images" | awk '{print "docker_images/" $0}' | tr '\n' ' ')
           else
             echo "No tarballs were detected, failing."
             exit 1
@@ -90,7 +90,7 @@ jobs:
       - name: Output the Docker Images locations
         id: get-docker-tarballs
         run: |
-          files=$(ls -1 "docker_images" | tr '\n' ' ')
+          files=$(ls -1 "docker_images" | awk '{print "docker_images/" $0}' | tr '\n' ' ')
           echo "Saving these files into output: $files"
           echo "docker-tarballs=$files" >> $GITHUB_OUTPUT
 
