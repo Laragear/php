@@ -99,9 +99,9 @@ services:
     # ...
 ```
 
-## Extensions
+## PHP Extensions
 
-This image includes the following extensions installed:
+This image includes the following PHP extensions installed:
 
 |            |           |         |          |
 |------------|-----------|---------|----------|
@@ -125,7 +125,7 @@ Because these extensions are installed at runtime, the container may take a whil
 
 > [!WARNING]
 > 
-> When adding extensions on old PHP versions, you may need to the proper version. Most of the latest versions of extensions deprecate unsupported PHP versions.
+> When adding extensions to old PHP versions, you may need to set a fixed version. Most of the "latest" versions of extensions deprecate unsupported PHP versions.
 > 
 > For example, installing `sqlsrv` on `php:7.4` won't work, as it will install the latest `v5.12.0`. Instead, you will need to set the proper version that supports PHP 7.4, as `sqlsrv:5.10.1`. You can see supporting versions of each extension at [PECL](https://pecl.php.net/).
 
