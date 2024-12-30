@@ -82,6 +82,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
   setup-matrix:
+    needs: cache_images
     runs-on: ubuntu-latest
     outputs:
       php-version-map-json: ${{ steps.get-php-versions.outputs.php-version-map-json }}
