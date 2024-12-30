@@ -92,7 +92,7 @@ jobs:
         run: |
           files=$(ls -1 "docker_images" | tr '\n' ' ')
           echo "Saving these files into output: $files"
-          echo "docker-tarballs=$(ls -1 "$files" | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          echo "docker-tarballs=$files" >> $GITHUB_OUTPUT
 
       - name: Move the cached images to the cache
         uses: actions/cache@v4
