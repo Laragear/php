@@ -168,7 +168,7 @@ jobs:
 
       - name: Load the previous Docker images
         run: |
-          for tarball in *_cached.tar; do
+          for tarball in $(cat .docker-tarballs); do
             docker load -i "$tarball"
           done
 
