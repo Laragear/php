@@ -62,15 +62,22 @@ jobs:
           common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' Dockerfile)
           # Loop through the images and pull them
           for image in $common_images; do
-            # Extract the image name and variable part
-            image_name=$(echo $image | cut -d':' -f1)
-            variable=$(echo $image | sed -n 's/.*:${\([^}]*\)}.*/\1/p')
-            # Pull the image using the environment variable
-            docker pull "$image_name:${!variable}"
-            tarball=$(basename "$image_name" | sed 's/:/-/g')_cached.tar
-            docker save -o "$tarball" "$image_name:${!variable}"
-            echo "$tarball" >> .docker-tarballs
+            (
+              # Extract the image name and variable part
+              image_name=$(echo $image | cut -d':' -f1)
+              variable=$(echo $image | sed -n 's/.*:${\([^}]*\)}.*/\1/p')
+              # Pull the image using the environment variable
+              docker pull "$image_name:${!variable}"
+              tarball=$(basename "$image_name" | sed 's/:/-/g')_cached.tar
+              docker save -o "$tarball" "$image_name:${!variable}"
+              (
+                flock -n 200
+                echo "$tarball" >> .docker-tarballs
+              ) 200>.docker-tarballs-lock
+              echo "$tarball" >> .docker-tarballs
+            ) &
           done
+          wait
 
       - name: Move the cached images to the cache
         uses: actions/cache@v4
