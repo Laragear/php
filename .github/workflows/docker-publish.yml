@@ -67,9 +67,9 @@ jobs:
               image_name=$(echo $image | cut -d':' -f1)
               variable=$(echo $image | sed -n 's/.*:${\([^}]*\)}.*/\1/p')
               # Pull the image using the environment variable
-              # docker pull "$image_name:${!variable}"
+              docker pull "$image_name:${!variable}"
               tarball=$(basename "$image_name" | sed 's/:/-/g')_cached.tar
-              # docker save -o "$tarball" "$image_name:${!variable}"
+              docker save -o "$tarball" "$image_name:${!variable}"
               (
                 flock -e 200
                 echo "Saving $tarball to file."
