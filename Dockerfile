@@ -119,6 +119,7 @@ RUN \
       nano \
       openssh-server \
       python3 \
+      sudo \
       unzip \
       xz-utils \
       zip && \
