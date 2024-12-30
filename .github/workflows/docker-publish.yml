@@ -71,7 +71,7 @@ jobs:
               tarball=$(basename "$image_name" | sed 's/:/-/g')_cached.tar
               # docker save -o "$tarball" "$image_name:${!variable}"
               (
-                flock -n 200
+                flock -e 200
                 echo "Saving $tarball to file."
                 echo "$tarball" >> .docker-tarballs
               ) 200>.docker-tarballs-lock
@@ -86,6 +86,8 @@ jobs:
         with:
           name: Docker Tarballs
           path: .docker-tarballs
+          overwrite: true
+          include-hidden-files: true
           if-no-files-found: error
 
       - name: Move the cached images to the cache
