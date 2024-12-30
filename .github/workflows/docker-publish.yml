@@ -24,6 +24,8 @@ env:
 jobs:
   cache_images:
     runs-on: ubuntu-latest
+    outputs:
+      docker-tarballs: ${{ steps.get-docker-tarballs.outputs.docker-tarballs }}
 
     steps:
       - name: Check out code
@@ -57,6 +59,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Pull images from Docker
+        id: get-docker-tarballs
         run: |
           # Read the Dockerfile and extract the common images
           common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' Dockerfile)
@@ -80,21 +83,13 @@ jobs:
           wait
           echo "These are the contents of the docker tarballs:"
           cat .docker-tarballs
-
-      - name: Upload file
-        uses: actions/upload-artifact@v4
-        with:
-          name: Docker Tarballs
-          path: .docker-tarballs
-          overwrite: true
-          include-hidden-files: true
-          if-no-files-found: error
+          echo "docker-tarballs=$(cat .docker-tarballs)" >> $GITHUB_OUTPUT
 
       - name: Move the cached images to the cache
         uses: actions/cache@v4
         with:
           path: |
-            $(cat .docker-tarballs)
+            ${{ steps.docker-tarballs.outputs.docker-tarballs }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -165,25 +160,19 @@ jobs:
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 
-      - name: Download file
-        uses: actions/download-artifact@v4
-        with:
-          name: Docker Tarballs
-
       # Prepare the cache to receive Buildx images downloaded.
       # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
       - name: Retrieve cached Docker layers
         uses: actions/cache@v4
         with:
-          path: |
-            $(cat .docker-tarballs)
+          path: ${{ steps.docker-tarballs.outputs.docker-tarballs }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
       - name: Load the previous Docker images
         run: |
-          for tarball in $(cat .docker-tarballs); do
+          for tarball in "${{ steps.docker-tarballs.outputs.docker-tarballs }}"; do
             docker load -i "$tarball"
           done
 
