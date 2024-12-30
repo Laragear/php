@@ -79,10 +79,11 @@ jobs:
 
       - name: Check images were pulled from Docker
         run: |
-          if [ -f ".docker-tarballs" && -n "$(sed 's/^[ \t]*//;s/[ \t]*$//' ".docker-tarballs" | sed '/^$/d')" ]; then
+          if [-d "docker_images" ] && [ "$(ls -A docker_images)" ]; then
             echo "These are the Docker tarballs to cache:"
-            cat .docker-tarballs
+            ls -l docker_images
           else
+            echo "No tarballs were detected, failing."
             exit 1
           fi
 
