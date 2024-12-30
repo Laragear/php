@@ -289,6 +289,11 @@ RUN \
 # Configure Composer
 #--------------------------------------------------------------------------
 #
+# Ensure the Composer directories exists and are accessible.
+RUN \
+    echo "Ensure Composer directory is '$COMPOSER_HOME' and the cache is '$COMPOSER_CACHE_DIR'" > /dev/stdout && \
+    mkdir ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} && \
+    chown ${USER_ID}:${GROUP_ID} -R /composer
 
 # If we're using Composer on a non-supported PHP version, downgrade to LTS.
 RUN \
@@ -297,11 +302,7 @@ RUN \
         composer self-update --2.2; \
     fi
 
-# Ensure the Composer directories exists and are accessible.
-RUN \
-    echo "Ensure Composer directory is '$COMPOSER_HOME' and the cache is '$COMPOSER_CACHE_DIR'" > /dev/stdout && \
-    mkdir ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} && \
-    chown ${USER_ID}:${GROUP_ID} -R /composer
+
 
 # Let's also add some common composer utilities globally.
 RUN \
