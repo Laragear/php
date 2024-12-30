@@ -7,12 +7,14 @@ ARG DENO_VERSION="latest"
 ARG BUN_VERSION="latest"
 ARG S6_VERSION="latest"
 
+# Common images start
 FROM composer:${COMPOSER_VERSION} AS composer-image
 FROM node:${NODE_VERSION} AS node-image
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION} AS frankenphp-image
 FROM ghcr.io/roadrunner-server/roadrunner:${RR_VERSION} AS roadrunner-image
 FROM denoland/deno:${DENO_VERSION} AS deno-image
 FROM oven/bun:${BUN_VERSION} AS bun-image
+# Common images end
 
 FROM php:${PHP_VERSION}
 

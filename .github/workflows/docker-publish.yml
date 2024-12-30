@@ -9,12 +9,78 @@ on:
     branches: [ "1.x" ]
 
 env:
+  DOCKER_BUILDKIT: 1
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   PHP_VERSIONS_FILE: "scripts/conf/versions.yml"
   PHP_VERSION_MIN: "5.6"
+  COMPOSER_VERSION: "latest"
+  NODE_VERSION: "latest"
+  FRANKENPHP_VERSION: "latest"
+  RR_VERSION: "latest"
+  DENO_VERSION: "latest"
+  BUN_VERSION: "latest"
 
 jobs:
+  cache_images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # Set up BuildKit so we can pull the images from Docker
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Pull images from Docker
+        run: |
+          # Read the Dockerfile and extract the common images
+          common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' Dockerfile)
+          # Loop through the images and pull them
+          for image in $common_images; do
+            # Extract the image name and variable part
+            image_name=$(echo $image | cut -d':' -f1)
+            variable=$(echo $image | cut -d':' -f2 | tr -d '$')
+            # Pull the image using the environment variable
+            docker pull "$image_name:${!variable}"
+            tarball=$(basename "$image_name" | sed 's/:/-/g')_cached.tar
+            docker save -o "$tarball" "$image_name:${!variable}"
+            echo "$tarball" >> .docker-tarballs
+          done
+
+      - name: Move the cached images to the cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            $(cat .docker-tarballs)
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
   setup-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -49,7 +115,8 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      max-parallel: 1
+      # Not needed because the cached images run brrrr...
+      # max-parallel: 1
       matrix:
         version: ${{fromJson(needs.setup-matrix.outputs.php-version-map-json)}}
 
@@ -85,10 +152,17 @@ jobs:
       - name: Retrieve cached Docker layers
         uses: actions/cache@v4
         with:
-          path: /tmp/.buildx-cache
+          path: |
+            $(cat .docker-tarballs)
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Load the previous Docker images
+        run: |
+          for tarball in *_cached.tar; do
+            docker load -i "$tarball"
+          done
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
