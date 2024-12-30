@@ -108,7 +108,6 @@ jobs:
 
       - name: Ensure our PHP Versions file exists.
         run: |
-          ls -lan ./
           if [ ! -f "${{ env.PHP_VERSIONS_FILE }}" ]; then
             echo "PHP Versions file does not exist. Exiting."
             exit 1
