@@ -53,11 +53,11 @@ This image includes everything to run in your development environment and then s
 
 > [!NOTE]
 >
-> ¹: FrankenPHP is only compatible with PHP 8.2 onwards.
+> ¹: FrankenPHP requires [PHP 8.2 or latter](https://github.com/dunglas/frankenphp/issues/637#issuecomment-1986480954).
 >
-> ²: RoadRunner is only compatible with PHP 8.0 onwards.
+> ²: RoadRunner requires [PHP 7.4 or latter](https://github.com/roadrunner-php/cli/blob/dddbf4c7c95c27cee8f115bbd6d4361a4e88a9e7/composer.json#L27).
 >
-> ³: Installed as part of [Corepack](https://nodejs.org/api/corepack.html). Corepack is not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
+> ³: Installed as part of [Corepack](https://nodejs.org/api/corepack.html). Not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
 > 
 > ⁴: Not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
  
