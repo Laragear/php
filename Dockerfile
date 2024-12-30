@@ -289,6 +289,14 @@ RUN \
 #--------------------------------------------------------------------------
 #
 
+# If we're using Composer on a non-supported PHP version, downgrade to LTS.
+RUN \
+    if ! composer show --platform | grep -q $(php -r "echo 'PHP version: ' . phpversion();"); then \
+        echo "Composer doesn't support this PHP version, downgrading to 2.2 (LTS)." && \
+        composer self-update --2.2 \
+    fi
+
+# Ensure the Composer directories exists and are accessible.
 RUN \
     echo "Ensure Composer directory is '$COMPOSER_HOME' and the cache is '$COMPOSER_CACHE_DIR'" > /dev/stdout && \
     mkdir ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} && \
