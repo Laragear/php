@@ -7,7 +7,7 @@ SSHD_KEYS_DIR="$SSH_DIR/sshd_keys"
 
 # Copy the host SSH keys for the server to the new directory
 echo "Ensuring SSH keys exist before starting the SSH Server." > /dev/stdout
-cp --update /etc/ssh/ssh_host_{rsa,ecdsa,ed25519}_key $SSHD_KEYS_DIR/
+sudo cp --update /etc/ssh/ssh_host_{rsa,ecdsa,ed25519}_key $SSHD_KEYS_DIR/
 
 # Create a minimal sshd_config file if it doesn't exists.
 if [ ! -f $SSHD_CONFIG_DIR/config ]; then
@@ -28,4 +28,4 @@ fi
 
 # Ensure the SSH directory is owned by the user
 echo "Ensuring SSH configuration is owned by $USER" > /dev/stdout
-chown -R $USER_ID:$GROUP_ID /ssh
+sudo chown -R $USER_ID:$GROUP_ID /ssh

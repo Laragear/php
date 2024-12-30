@@ -7,6 +7,10 @@ ARG DENO_VERSION="latest"
 ARG BUN_VERSION="latest"
 ARG S6_VERSION="latest"
 
+### Only add images here that can be set with versions via Build Arguments.
+### The purpose of this block is to cache these images when building the
+### main image at the very beginning of that GitHub Actions Workflow.
+
 # Common images start
 FROM composer:${COMPOSER_VERSION} AS composer-image
 FROM node:${NODE_VERSION} AS node-image
@@ -321,9 +325,9 @@ RUN \
 #--------------------------------------------------------------------------
 #
 
-RUN \
-    echo "Setting the container timezone to '$TZ'" > /dev/stdout && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+COPY ./fixes/set_timezone.sh /var/fixes/set_timezone.sh
+
+RUN /var/fixes/set_timezone.sh
 
 #
 #--------------------------------------------------------------------------
@@ -332,8 +336,5 @@ RUN \
 #
 
 WORKDIR /app
-
-# Set the entrypoint to S6 OVerlay custom INIT.
-ENTRYPOINT ["/init"]
 
 CMD ["/bin/bash"]

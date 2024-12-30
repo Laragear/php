@@ -53,11 +53,11 @@ This image includes everything to run in your development environment and then s
 
 > [!NOTE]
 >
-> ¹: FrankenPHP is only compatible with PHP 8.2 onwards.
+> ¹: FrankenPHP requires [PHP 8.2 or latter](https://github.com/dunglas/frankenphp/issues/637#issuecomment-1986480954).
 >
-> ²: RoadRunner is only compatible with PHP 8.0 onwards.
+> ²: RoadRunner requires [PHP 7.4 or latter](https://github.com/roadrunner-php/cli/blob/dddbf4c7c95c27cee8f115bbd6d4361a4e88a9e7/composer.json#L27).
 >
-> ³: Installed as part of [Corepack](https://nodejs.org/api/corepack.html). Corepack is not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
+> ³: Installed as part of [Corepack](https://nodejs.org/api/corepack.html). Not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
 > 
 > ⁴: Not available on [EOL Debian images](https://wiki.debian.org/DebianReleases#Production_Releases) (like those using PHP 7.0 and PHP 5.6).
  
@@ -99,9 +99,9 @@ services:
     # ...
 ```
 
-## Extensions
+## PHP Extensions
 
-This image includes the following extensions installed:
+This image includes the following PHP extensions installed:
 
 |            |           |         |          |
 |------------|-----------|---------|----------|
@@ -125,7 +125,7 @@ Because these extensions are installed at runtime, the container may take a whil
 
 > [!WARNING]
 > 
-> When adding extensions on old PHP versions, you may need to the proper version. Most of the latest versions of extensions deprecate unsupported PHP versions.
+> When adding extensions to old PHP versions, you may need to set a fixed version. Most of the "latest" versions of extensions deprecate unsupported PHP versions.
 > 
 > For example, installing `sqlsrv` on `php:7.4` won't work, as it will install the latest `v5.12.0`. Instead, you will need to set the proper version that supports PHP 7.4, as `sqlsrv:5.10.1`. You can see supporting versions of each extension at [PECL](https://pecl.php.net/).
 
