@@ -81,7 +81,7 @@ jobs:
         run: |
           if [ -d "docker_images" ] && [ "$(ls -A docker_images)" ]; then
             echo "These are the Docker tarballs to cache:"
-            ls -l docker_images
+            ls -1 docker_images
           else
             echo "No tarballs were detected, failing."
             exit 1
@@ -89,13 +89,16 @@ jobs:
 
       - name: Output the Docker Images locations
         id: get-docker-tarballs
-        run: echo "docker-tarballs=$(ls -1 "docker_images" | tr '\n' ' ')" >> $GITHUB_OUTPUT
+        run: |
+          files=$(ls -1 "docker_images" | tr '\n' ' ')
+          echo "Saving these files into output: $files"
+          echo "docker-tarballs=$(ls -1 "$files" | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Move the cached images to the cache
         uses: actions/cache@v4
         with:
           path: |
-            ${{ steps.docker-tarballs.outputs.docker-tarballs }}
+            ${{ steps.get-docker-tarballs.outputs.docker-tarballs }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -172,14 +175,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{ steps.docker-tarballs.outputs.docker-tarballs }}
+            ${{ steps.get-docker-tarballs.outputs.docker-tarballs }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
       - name: Load the previous Docker images
         run: |
-          for tarball in "${{ steps.docker-tarballs.outputs.docker-tarballs }}"; do
+          for tarball in "${{ steps.get-docker-tarballs.outputs.docker-tarballs }}"; do
             docker load -i "$tarball"
           done
 
