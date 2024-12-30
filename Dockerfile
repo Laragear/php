@@ -297,19 +297,19 @@ RUN \
 
 # If we're using Composer on a non-supported PHP version, downgrade to LTS.
 RUN \
-    if ! composer show --platform | grep -q $(php -r "echo 'PHP version: ' . phpversion();"); then \
-        echo "Composer doesn't support this PHP version, downgrading to 2.2 (LTS)." > /dev/stdout && \
-        composer self-update --2.2; \
+    if php -r "exit(version_compare(PHP_VERSION, '7.2.5', '<') ? 0 : 1);" ; then \
+      echo 'Downgrading Composer to version 2.2...'; \
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2.2; \
     fi
-
-
 
 # Let's also add some common composer utilities globally.
 RUN \
+    PACKAGES="phpunit/phpunit" && \
+    if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);"; then \
+      PACKAGES="$PACKAGES laravel/pint"; \
+    fi && \
     echo "Adding some useful Composer packages globally" > /dev/stdout && \
-    sudo -u $USER /usr/local/bin/composer --no-cache global require \
-      laravel/pint \
-      phpunit/phpunit && \
+    sudo -u $USER /usr/local/bin/composer --no-cache global require $PACKAGES && \
     # Clear composer cache and keep the image size lean
     composer clear-cache
 
