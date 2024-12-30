@@ -59,7 +59,7 @@ jobs:
       - name: Pull images from Docker
         run: |
           # Read the Dockerfile and extract the common images
-          common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' Dockerfile)
+          common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' $GITHUB_WORKSPACE/Dockerfile)
           # Loop through the images and pull them
           for image in $common_images; do
             (
@@ -72,8 +72,9 @@ jobs:
               docker save -o "$tarball" "$image_name:${!variable}"
               (
                 flock -n 200
-                echo "$tarball" >> .docker-tarballs
-              ) 200>.docker-tarballs-lock
+                echo "Saving $tarball to file."
+                echo "$tarball" >> $GITHUB_WORKSPACE/.docker-tarballs
+              ) 200>$GITHUB_WORKSPACE/.docker-tarballs-lock
             ) &
           done
           wait
@@ -81,14 +82,15 @@ jobs:
       - name: Upload file
         uses: actions/upload-artifact@v4
         with:
-          name: .docker-tarballs
-          path: .docker-tarballs
+          name: Docker Tarballs
+          path: $GITHUB_WORKSPACE/.docker-tarballs
+          if-no-files-found: error
 
       - name: Move the cached images to the cache
         uses: actions/cache@v4
         with:
           path: |
-            $(cat .docker-tarballs)
+            $(cat $GITHUB_WORKSPACE/.docker-tarballs)
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -162,7 +164,8 @@ jobs:
       - name: Download file
         uses: actions/download-artifact@v4
         with:
-          name: .docker-tarballs
+          name: Docker Tarballs
+          path: $GITHUB_WORKSPACE/.docker-tarballs
 
       # Prepare the cache to receive Buildx images downloaded.
       # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
@@ -170,14 +173,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            $(cat .docker-tarballs)
+            $(cat $GITHUB_WORKSPACE/.docker-tarballs)
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
       - name: Load the previous Docker images
         run: |
-          for tarball in $(cat .docker-tarballs); do
+          for tarball in $(cat $GITHUB_WORKSPACE/.docker-tarballs); do
             docker load -i "$tarball"
           done
 
