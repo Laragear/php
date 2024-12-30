@@ -40,7 +40,7 @@ PHP_VERSION_MIN=${PHP_VERSION_MIN:-"5.6"}
 # Ensure the directory exists
 mkdir -p ./conf
 
-rm "$PHP_VERSIONS_FILE"
+rm -f "$PHP_VERSIONS_FILE"
 
 # Fetch the JSON data from the URL
 json_data=$(curl -s https://www.php.net/releases/index.php?json)
