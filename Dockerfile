@@ -292,7 +292,7 @@ RUN \
 RUN \
     echo "Ensure Composer directory is '$COMPOSER_HOME' and the cache is '$COMPOSER_CACHE_DIR'" > /dev/stdout && \
     mkdir ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} && \
-    chown ${USER_ID}:${GROUP_ID} -R /composer \
+    chown ${USER_ID}:${GROUP_ID} -R /composer
 
 # Let's also add some common composer utilities globally.
 RUN \
