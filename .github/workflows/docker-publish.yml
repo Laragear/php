@@ -59,7 +59,6 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Pull images from Docker
-        id: get-docker-tarballs
         run: |
           mkdir docker_images
           cd docker_images
