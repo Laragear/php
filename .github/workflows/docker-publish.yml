@@ -61,9 +61,8 @@ jobs:
       - name: Pull images from Docker
         run: |
           mkdir docker_images
-          cd docker_images
           # Read the Dockerfile and extract the common images
-          common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' ../Dockerfile)
+          common_images=$(awk '/# Common images start/,/# Common images end/ { if ($1 == "FROM") print $2 }' Dockerfile)
           # Loop through the images and pull them
           for image in $common_images; do
             (
