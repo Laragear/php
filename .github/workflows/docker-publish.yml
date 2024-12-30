@@ -58,6 +58,17 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      # Reuse the cache for this PR specifically
+      # For that, we will use the PR number as cache to hit it more constantly.
+      - name: Restore the images from the cache for PR purposes
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@v4
+        with:
+          path: ./docker-images
+          key: ${{ runner.os }}-docker-images-${{ github.event.pull_request.number }}
+          restore-keys: |
+            ${{ runner.os }}-docker-images-
+
       - name: Pull images from Docker
         run: |
           mkdir docker_images
@@ -66,22 +77,24 @@ jobs:
           # Loop through the images and pull them
           for image in $common_images; do
             (
-              # Extract the image name and variable part
+              # Extract the image name, variable part, and set the tarball location
               image_name=$(echo $image | cut -d':' -f1)
               variable=$(echo $image | sed -n 's/.*:${\([^}]*\)}.*/\1/p')
-              # Pull the image using the environment variable
-              docker pull "$image_name:${!variable}"
-              tarball=docker_images/$(basename "$image_name" | sed 's/:/-/g')_cached.tar
-              docker save -o "$tarball" "$image_name:${!variable}"
+              tarball="docker-images/$(basename "$image_name" | sed 's/:/-/g')_cached.tar"
+              # Pull the image if it doesn't exists its cached version
+              if [ ! -f "$tarball" ]; then
+                docker pull "$image_name:${!variable}"
+                docker save -o "$tarball" "$image_name:${!variable}"
+              fi
             ) &
           done
           wait
 
-      - name: Check images were pulled from Docker
+      - name: Check images pulled from Docker
         run: |
-          if [ -d "docker_images" ] && [ "$(ls -A docker_images)" ]; then
+          if [ -d "docker-images" ] && [ "$(ls -A docker-images)" ]; then
             echo "These are the Docker tarballs to cache:"
-            ls -1 "docker_images"
+            ls -1 "docker-images"
           else
             echo "No tarballs were detected, failing."
             exit 1
@@ -92,19 +105,8 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/cache/save@v4
         with:
-          path: ./docker_images
+          path: ./docker-images
           key: ${{ runner.os }}-docker-images-${{ github.sha }}
-
-      # Don't renew the cache if this is a PR
-      # For that, we will use the PR number as cache to hit it more constantly.
-      - name: Restore the images from the cache for PR purposes
-        if: github.event_name == 'pull_request'
-        uses: actions/cache@v4
-        with:
-          path: ./docker_images
-          key: ${{ runner.os }}-docker-images-${{ github.event.pull_request.number }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
 
   setup-matrix:
     needs: cache_images
@@ -170,39 +172,28 @@ jobs:
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 
-      # Prepare the cache to receive Buildx images downloaded.
-      # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-      - name: Retrieve cached Docker layers
-        if: github.event_name != 'pull_request'
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      # Prepare the cache to receive Buildx images downloaded.
-      # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-      - name: Retrieve cached Docker layers
-        if: github.event_name == 'pull_request'
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.event.pull_request.number }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: Restore cached Docker Images
+        if: github.event_name != 'pull_request'
         uses: actions/cache/restore@v4
         with:
-          path: ./docker_images
+          path: ./docker-images
           key: ${{ runner.os }}-docker-images-${{ github.sha }}
 
+      # If this is a PR, we will just restore the images from the PR Number.
+      - name: Restore cached Docker Images for the Pull Request
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@v4
+        with:
+          path: ./docker-images
+          key: ${{ runner.os }}-docker-images-${{ github.event.pull_request.number }}
+
+      # Load each cached image to Docker in parallel because we are cool.
       - name: Load the Docker images into BuildKit
         run: |
-          for tarball in docker_images/*; do
-            docker load -i "$tarball"
+          for tarball in docker-images/*; do
+            docker load -i "$tarball" &
           done
+          wait
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -261,19 +252,10 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             PHP_VERSION=${{ matrix.version }}
-
-      # Temp fix
-      # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-      # https://github.com/docker/build-push-action/issues/252
-      # https://github.com/moby/buildkit/issues/1896
-      - name: Move cache to reachable directory
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
