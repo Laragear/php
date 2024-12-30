@@ -307,7 +307,7 @@ RUN \
 # Let's also add some common composer utilities globally.
 RUN \
     echo "Adding some useful Composer packages globally" > /dev/stdout && \
-    /usr/local/bin/composer --no-cache --global require \
+    sudo -u $USER /usr/local/bin/composer --no-cache global require \
       laravel/pint \
       phpunit/phpunit && \
     # Clear composer cache and keep the image size lean
