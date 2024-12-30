@@ -165,7 +165,8 @@ jobs:
       - name: Retrieve cached Docker layers
         uses: actions/cache@v4
         with:
-          path: ${{ steps.docker-tarballs.outputs.docker-tarballs }}
+          path: |
+            ${{ steps.docker-tarballs.outputs.docker-tarballs }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
