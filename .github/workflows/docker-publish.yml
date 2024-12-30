@@ -64,7 +64,7 @@ jobs:
           for image in $common_images; do
             # Extract the image name and variable part
             image_name=$(echo $image | cut -d':' -f1)
-            variable=$(echo $image | cut -d':' -f2 | tr -d '$')
+            variable=$(echo $image | sed -n 's/.*:${\([^}]*\)}.*/\1/p')
             # Pull the image using the environment variable
             docker pull "$image_name:${!variable}"
             tarball=$(basename "$image_name" | sed 's/:/-/g')_cached.tar
