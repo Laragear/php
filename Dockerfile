@@ -325,9 +325,9 @@ RUN \
 #--------------------------------------------------------------------------
 #
 
-RUN \
-    echo "Setting the container timezone to '$TZ'" > /dev/stdout && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+COPY ./fixes/set_timezone.sh /var/fixes/set_timezone.sh
+
+RUN /var/fixes/set_timezone.sh
 
 #
 #--------------------------------------------------------------------------
@@ -336,8 +336,5 @@ RUN \
 #
 
 WORKDIR /app
-
-# Set the entrypoint to S6 OVerlay custom INIT.
-ENTRYPOINT ["/init"]
 
 CMD ["/bin/bash"]

@@ -9,9 +9,9 @@ for PROJECT_DIRECTORY in $PATHS; do
         # If the PROJECT_DIRECTORY is a directory and not a symlink
         echo "Fixing permissions for '${PROJECT_DIRECTORY}'" > /dev/stdout
         if [ -d "$PROJECT_DIRECTORY" ] && [ ! -L "$PROJECT_DIRECTORY" ]; then
-            chown -R "$USER_ID:$GROUP_ID" $PROJECT_DIRECTORY
+            sudo chown -R "$USER_ID:$GROUP_ID" $PROJECT_DIRECTORY
         elif [ -e "$PROJECT_DIRECTORY" ]; then
-            chown "$USER_ID:$GROUP_ID" $PROJECT_DIRECTORY
+            sudo chown "$USER_ID:$GROUP_ID" $PROJECT_DIRECTORY
         fi
     fi
 done

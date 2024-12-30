@@ -60,7 +60,7 @@ jobs:
 
       # Reuse the cache for this PR specifically
       # For that, we will use the PR number as cache to hit it more constantly.
-      - name: Restore the images from the cache for PR purposes
+      - name: Restore the images from the cache for the Pull Request
         if: github.event_name == 'pull_request'
         uses: actions/cache@v4
         with:

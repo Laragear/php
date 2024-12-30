@@ -2,4 +2,4 @@
 
 echo "Starting SSH Server" > /dev/stdout
 
-exec /usr/sbin/sshd -f /ssh/sshd_config/config -D -e
+exec sudo /usr/sbin/sshd -f /ssh/sshd_config/config -D -e
