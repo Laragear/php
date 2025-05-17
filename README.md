@@ -67,10 +67,10 @@ Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP ver
 
 | Tags                 | Status    | PHP Version | Debian Version                                            |
 |----------------------|-----------|-------------|-----------------------------------------------------------|
-| `8.4` `latest` `1.x` | Supported | `8.4`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
-| `8.3`                | Supported | `8.3`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
-| `8.2`                | Security  | `8.2`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
-| `8.1`                | Security  | `8.1`       | [`11.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.4` `latest` `1.x` | Supported | `8.4`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.3`                | Supported | `8.3`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.2`                | Security  | `8.2`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.1`                | Security  | `8.1`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
 | `8.0`                | EOL       | `8.0`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
 | `7.4`                | EOL       | `7.4`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
 | `7.3`                | EOL       | `7.3`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
