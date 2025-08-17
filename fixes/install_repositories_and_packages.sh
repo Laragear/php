@@ -79,29 +79,29 @@ fi
 # Check if MONGODB_VERSION is empty or set to "latest"
 if [ -z "$MONGODB_VERSION" ] || [ "$MONGODB_VERSION" == "latest" ]; then
     # Function to get the latest stable MongoDB version for a given Debian codename
-    get_latest_mongodb_version() {
-        local BASE_URL="https://s3.amazonaws.com/repo.mongodb.org?list-type=2&prefix=apt/debian/dists/"
-        local URL="${BASE_URL}${CURRENT_OS_CODENAME}/mongodb-org/&delimiter=/"
+    MONGODB_BASE_URL="https://s3.amazonaws.com/repo.mongodb.org?list-type=2&prefix=apt/debian/dists/${MONGODB_BASE_URL}/${CURRENT_OS_CODENAME}/mongodb-org/&delimiter=/"
 
-        local xml=$(curl -fsSL "$URL") || { echo "❌ Failed to download $URL" >&2; exit 1; }
+    MONGODB_XML=$(curl -fsSL "$MONGODB_BASE_URL") || { return 1; }
 
-        local versions=$(printf '%s' "$xml" |
-            # Grab everything between <Prefix>…</Prefix>
-            grep -oP '(?<=<Prefix>)[^<]+' |
-            # Keep only the part that ends with a slash and looks like 4.x.y
-            grep -E '[0-9]+\.[0-9]+\.{0,1}[0-9]*' |
-            # Strip the trailing slash so we have just "4.2.16"
-            sed 's:/$::' | rev | cut -d/ -f1 | rev
-        )
-
-        MONGODB_VERSION=$(printf '%s\n' "$versions" | sort -V | tail -n1)
-    }
+    VERSIONS=$(printf '%s' "$MONGODB_XML" |
+        # Grab everything between <Prefix>…</Prefix>
+        grep -oP '(?<=<Prefix>)[^<]+' |
+        # Keep only the part that ends with a slash and looks like 4.x.y
+        grep -E '[0-9]+\.[0-9]+\.{0,1}[0-9]*' |
+        # Strip the trailing slash so we have just "4.2.16"
+        sed 's:/$::' | rev | cut -d/ -f1 | rev
+    )
 
     # Fetch the content of the URL
-    MONGODB_VERSION=$(get_latest_mongodb_version)
+    MONGODB_VERSION=$(printf '%s\n' "$VERSIONS" | sort -V | tail -n1)
 
-    export MONGODB_VERSION
-    echo "MONGODB_VERSION is set to the latest stable version: $MONGODB_VERSION" > /dev/stdout
+    if [ ! -z "$MONGODB_VERSION" ]; then
+        export MONGODB_VERSION
+        echo "MONGODB_VERSION is set to the latest stable version: $MONGODB_VERSION" > /dev/stdout
+    else
+        echo "MONGODB_VERSION not found for ${CURRENT_OS_CODENAME}"
+    fi
+
 else
     echo "MONGODB_VERSION is already set to: $MONGODB_VERSION" > /dev/stdout
 fi
@@ -110,15 +110,23 @@ fi
 echo "Ensuring keyrings directory exists" > /dev/stdout
 mkdir -p /etc/apt/keyrings
 
+PACKAGES=sqlite3
+
 # Node Repository
 echo "Adding Node Repository" > /dev/stdout
 curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/node.gpg
 echo "deb [signed-by=/etc/apt/keyrings/node.gpg] http://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/node.list
 
 # MySQL Repository
-echo "Adding MySQL Repository" > /dev/stdout
-curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg
-echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ ${CURRENT_OS_CODENAME} mysql-${MYSQL_REPO_VERSION}" > /etc/apt/sources.list.d/mysql.list
+# Find if there is a distro version available for MySQL. If not, bail out.
+if curl -s --head "https://repo.mysql.com/apt/debian/dists/{$CURRENT_OS_CODENAME}/" | grep "200 OK" > /dev/null; then
+    echo "Adding MySQL Repository" > /dev/stdout
+    curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg
+    echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ ${CURRENT_OS_CODENAME} mysql-${MYSQL_REPO_VERSION}" > /etc/apt/sources.list.d/mysql.list
+    PACKAGES="${PACKAGES:+PACKAGES }mysql-shell"
+else
+    echo "No repository for ${CURRENT_OS_CODENAME} for MariaDB ${MYSQL_VERSION}, not using MySQL client."
+fi
 
 # MariaDB Repository
 # Find if there the distro version is available for MariaDB. If not, bail out.
@@ -126,8 +134,9 @@ if curl -s --head "http://mirror.mariadb.org/repo/${MARIADB_VERSION}/debian/dist
     echo "Adding MariaDB Repository" > /dev/stdout
     curl -fsSL https://mariadb.org/mariadb_release_signing_key.pgp | gpg --dearmor -o /usr/share/keyrings/mariadb.gpg
     echo "deb [signed-by=/usr/share/keyrings/mariadb.gpg] http://deb.mariadb.org/${MARIADB_VERSION}/debian ${CURRENT_OS_CODENAME} main" > /etc/apt/sources.list.d/mariadb.list
+    PACKAGES="${PACKAGES:+PACKAGES }mariadb-client"
 else
-    echo "No repository for ${CURRENT_OS_CODENAME} for MariaDB ${MARIADB_VERSION}, not using mariadb client."
+    echo "No repository for ${CURRENT_OS_CODENAME} for MariaDB ${MARIADB_VERSION}, not using MariaDB client."
 fi
 
 POSTGRESQL_CLIENT="postgresql-client"
@@ -145,6 +154,8 @@ else
     echo "No repository for ${CURRENT_OS_CODENAME} for PostgreSQL, using default upstream client."
 fi
 
+PACKAGES="${PACKAGES:+PACKAGES }$POSTGRESQL_CLIENT"
+
 # MongoDB Repository
 if [ -z "$MONGODB_VERSION" ]; then
     echo "No MongoDB version found for ${CURRENT_OS_CODENAME}, nothing to add."
@@ -152,20 +163,16 @@ else
     echo "Adding MongoDB Repository" > /dev/stdout
     curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb.gpg
     echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
-
-    echo "Installing Database Clients" > /dev/stdout
+    PACKAGES="${PACKAGES:+PACKAGES }mongocli"
 fi
+
+echo "Installing Database Clients: $PACKAGES" > /dev/stdout
 
 # Update APT with the new repositories
 apt-get update
 
 # Install the Database clients
-apt-get install -y --no-install-recommends \
-    mysql-shell \
-    mariadb-client \
-    $POSTGRESQL_CLIENT \
-    mongocli \
-    sqlite3
+apt-get install -y --no-install-recommends "$PACKAGES"
 
 # Clean installation leftovers
 apt-get -y autoremove
