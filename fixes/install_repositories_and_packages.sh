@@ -79,7 +79,7 @@ fi
 # Check if MONGODB_VERSION is empty or set to "latest"
 if [ -z "$MONGODB_VERSION" ] || [ "$MONGODB_VERSION" == "latest" ]; then
     # Function to get the latest stable MongoDB version for a given Debian codename
-    MONGODB_BASE_URL="https://s3.amazonaws.com/repo.mongodb.org?list-type=2&prefix=apt/debian/dists/${MONGODB_BASE_URL}/${CURRENT_OS_CODENAME}/mongodb-org/&delimiter=/"
+    MONGODB_BASE_URL="https://s3.amazonaws.com/repo.mongodb.org?list-type=2&prefix=apt/debian/dists/${CURRENT_OS_CODENAME}/mongodb-org/&delimiter=/"
 
     MONGODB_XML=$(curl -fsSL "$MONGODB_BASE_URL") || { return 1; }
 
@@ -101,7 +101,6 @@ if [ -z "$MONGODB_VERSION" ] || [ "$MONGODB_VERSION" == "latest" ]; then
     else
         echo "MONGODB_VERSION not found for ${CURRENT_OS_CODENAME}"
     fi
-
 else
     echo "MONGODB_VERSION is already set to: $MONGODB_VERSION" > /dev/stdout
 fi
