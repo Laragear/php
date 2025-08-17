@@ -80,7 +80,7 @@ fi
 if [ -z "$MONGODB_VERSION" ] || [ "$MONGODB_VERSION" == "latest" ]; then
   # Fetch the content of the URL
   MONGODB_VERSION=$(
-        curl -s "http://downloads.mongodb.org.s3.amazonaws.com/current.json" | jq -r ".versions[] | select(.development_release == false and (.downloads[] | select(.arch == \"$ARCH\" and (.target | startswith(\"debian\")) and (.packages[] | contains(\"$CURRENT_OS_CODENAME\")) and (.packages[] | contains(\"unstable\") | not) ))) | .version" | \
+        curl -s "https://fastdl.mongodb.org/current.json" | jq -r ".versions[] | select(.development_release == false and (.downloads[] | select(.arch == \"$ARCH\" and (.target | startswith(\"debian\")) and (.packages[] | contains(\"$CURRENT_OS_CODENAME\")) and (.packages[] | contains(\"unstable\") | not) ))) | .version" | \
         sort -V | \
         tail -n 1 | \
         awk -F. '{print $1 "." $2}'
