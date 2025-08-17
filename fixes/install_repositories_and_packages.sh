@@ -172,7 +172,7 @@ echo "Installing Database Clients: $PACKAGES" > /dev/stdout
 apt-get update
 
 # Install the Database clients
-apt-get install -y --no-install-recommends "$PACKAGES"
+apt-get install -y --no-install-recommends $PACKAGES
 
 # Clean installation leftovers
 apt-get -y autoremove
