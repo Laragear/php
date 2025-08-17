@@ -110,7 +110,7 @@ fi
 echo "Ensuring keyrings directory exists" > /dev/stdout
 mkdir -p /etc/apt/keyrings
 
-PACKAGES=sqlite3
+PACKAGES="sqlite3"
 
 # Node Repository
 echo "Adding Node Repository" > /dev/stdout
@@ -123,7 +123,7 @@ if curl -s --head "https://repo.mysql.com/apt/debian/dists/{$CURRENT_OS_CODENAME
     echo "Adding MySQL Repository" > /dev/stdout
     curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg
     echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ ${CURRENT_OS_CODENAME} mysql-${MYSQL_REPO_VERSION}" > /etc/apt/sources.list.d/mysql.list
-    PACKAGES="${PACKAGES:+PACKAGES }mysql-shell"
+    PACKAGES="${PACKAGES:+$PACKAGES }mysql-shell"
 else
     echo "No repository for ${CURRENT_OS_CODENAME} for MariaDB ${MYSQL_VERSION}, not using MySQL client."
 fi
@@ -134,7 +134,7 @@ if curl -s --head "http://mirror.mariadb.org/repo/${MARIADB_VERSION}/debian/dist
     echo "Adding MariaDB Repository" > /dev/stdout
     curl -fsSL https://mariadb.org/mariadb_release_signing_key.pgp | gpg --dearmor -o /usr/share/keyrings/mariadb.gpg
     echo "deb [signed-by=/usr/share/keyrings/mariadb.gpg] http://deb.mariadb.org/${MARIADB_VERSION}/debian ${CURRENT_OS_CODENAME} main" > /etc/apt/sources.list.d/mariadb.list
-    PACKAGES="${PACKAGES:+PACKAGES }mariadb-client"
+    PACKAGES="${PACKAGES:+$PACKAGES }mariadb-client"
 else
     echo "No repository for ${CURRENT_OS_CODENAME} for MariaDB ${MARIADB_VERSION}, not using MariaDB client."
 fi
@@ -154,7 +154,7 @@ else
     echo "No repository for ${CURRENT_OS_CODENAME} for PostgreSQL, using default upstream client."
 fi
 
-PACKAGES="${PACKAGES:+PACKAGES }$POSTGRESQL_CLIENT"
+PACKAGES="${PACKAGES:+$PACKAGES }$POSTGRESQL_CLIENT"
 
 # MongoDB Repository
 if [ -z "$MONGODB_VERSION" ]; then
@@ -163,7 +163,7 @@ else
     echo "Adding MongoDB Repository" > /dev/stdout
     curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb.gpg
     echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
-    PACKAGES="${PACKAGES:+PACKAGES }mongocli"
+    PACKAGES="${PACKAGES:+$PACKAGES }mongocli"
 fi
 
 echo "Installing Database Clients: $PACKAGES" > /dev/stdout
