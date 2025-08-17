@@ -2,7 +2,7 @@
 
 # Retrieves the latest version number from Node.js API
 get_node_version() {
-  curl -s https://nodejs.org/dist/index.json | jq -r "[.[] | select(.version | test(\"${version}\"))] | .[0].version" | sed -E 's/^v([0-9]+)\..*/\1/'
+    curl -s https://nodejs.org/dist/index.json | jq -r "[.[] | select(.version | test(\"${version}\"))] | .[0].version" | sed -E 's/^v([0-9]+)\..*/\1/'
 }
 
 # Find the current container system architecture
@@ -23,14 +23,14 @@ echo "Adding repositories" > /dev/stdout
 
 # Check if NODE_VERSION is empty or set to "latest"
 if [ -z "$NODE_VERSION" ] || [ "$NODE_VERSION" == "latest" ] || [ "$NODE_VERSION" == "current" ]; then
-  NODE_VERSION="$(get_node_version "current")"
-  echo "NODE_VERSION is set to the current version: $NODE_VERSION" > /dev/stdout
+    NODE_VERSION="$(get_node_version "current")"
+    echo "NODE_VERSION is set to the current version: $NODE_VERSION" > /dev/stdout
 # Check if NODE_VERSION is equal to "lts"
 elif [ "$NODE_VERSION" == "lts" ]; then
-  NODE_VERSION="$(get_node_version "lts")"
-  echo "NODE_VERSION is set to the LTS version: $NODE_VERSION" > /dev/stdout
+    NODE_VERSION="$(get_node_version "lts")"
+    echo "NODE_VERSION is set to the LTS version: $NODE_VERSION" > /dev/stdout
 else
-  echo "NODE_VERSION is already set to: $NODE_VERSION" > /dev/stdout
+    echo "NODE_VERSION is already set to: $NODE_VERSION" > /dev/stdout
 fi
 
 # Break out on EOL Debian since barely anything will work except from Node, barely.
@@ -43,52 +43,67 @@ MYSQL_REPO_VERSION="innovation"
 
 # Check if MYSQL_VERSION is empty or set to "latest"
 if [ -z "$MYSQL_VERSION" ] || [ "$MYSQL_VERSION" == "latest" ] || [ "$MYSQL_VERSION" == "innovation" ]; then
-  # Fetch the URL content
-  content=$(curl -s "http://repo.mysql.com/apt/debian/dists/$CURRENT_OS_CODENAME/")
+    # Fetch the URL content
+    content=$(curl -s "http://repo.mysql.com/apt/debian/dists/$CURRENT_OS_CODENAME/")
 
-  if echo "$content" | grep -q "innovation"; then
-      MYSQL_REPO_VERSION="innovation"
-  else
-    MYSQL_VERSION=$(echo "$content" | grep -oP 'mysql-\d+\.\d+' | sort -V | tail -n 1)
-    MYSQL_REPO_VERSION="$MYSQL_VERSION"
-  fi
+    if echo "$content" | grep -q "innovation"; then
+        MYSQL_REPO_VERSION="innovation"
+    else
+        MYSQL_VERSION=$(echo "$content" | grep -oP 'mysql-\d+\.\d+' | sort -V | tail -n 1)
+        MYSQL_REPO_VERSION="$MYSQL_VERSION"
+    fi
 
-  export MYSQL_VERSION
-  echo "MYSQL_VERSION is set to the latest stable version: $MYSQL_VERSION" > /dev/stdout
+    export MYSQL_VERSION
+    echo "MYSQL_VERSION is set to the latest stable version: $MYSQL_VERSION" > /dev/stdout
 else
-  echo "MYSQL_VERSION is already set to: $MYSQL_VERSION" > /dev/stdout
+    echo "MYSQL_VERSION is already set to: $MYSQL_VERSION" > /dev/stdout
 fi
 
 # Check if MARIADB_VERSION is empty or set to "latest"
 if [ -z "$MARIADB_VERSION" ] || [ "$MARIADB_VERSION" == "latest" ] || [ "$MARIADB_VERSION" == "stable" ]; then
-  MARIADB_VERSION=$(curl -s https://downloads.mariadb.org/rest-api/mariadb/ | jq -r '.major_releases[] | select(.release_id | test("^[0-9]+\\.[0-9]+$")) | .release_id' | head -n 1)
-  export MARIADB_VERSION
-  echo "MARIADB_VERSION is set to the latest stable version: $MARIADB_VERSION" > /dev/stdout
+    MARIADB_VERSION=$(curl -s https://downloads.mariadb.org/rest-api/mariadb/ | jq -r '.major_releases[] | select(.release_id | test("^[0-9]+\\.[0-9]+$")) | .release_id' | head -n 1)
+    export MARIADB_VERSION
+    echo "MARIADB_VERSION is set to the latest stable version: $MARIADB_VERSION" > /dev/stdout
 else
-  echo "MARIADB_VERSION is already set to: $MARIADB_VERSION" > /dev/stdout
+    echo "MARIADB_VERSION is already set to: $MARIADB_VERSION" > /dev/stdout
 fi
 
 if [ -z "$PGSQL_VERSION" ] || [ "$PGSQL_VERSION" == "latest" ]; then
-  PGSQL_VERSION=$(curl -s https://ftp.postgresql.org/pub/latest/ | grep -oP 'postgresql-\d+\.\d+' | cut -d'-' -f2 | cut -d'.' -f1 | head -n 1)
-  export PGSQL_VERSION
-  echo "PGSQL_VERSION is set to the latest stable version: $PGSQL_VERSION" > /dev/stdout
+    PGSQL_VERSION=$(curl -s https://ftp.postgresql.org/pub/latest/ | grep -oP 'postgresql-\d+\.\d+' | cut -d'-' -f2 | cut -d'.' -f1 | head -n 1)
+    export PGSQL_VERSION
+    echo "PGSQL_VERSION is set to the latest stable version: $PGSQL_VERSION" > /dev/stdout
 else
-  echo "PGSQL_VERSION is already set to: $PGSQL_VERSION" > /dev/stdout
+    echo "PGSQL_VERSION is already set to: $PGSQL_VERSION" > /dev/stdout
 fi
 
 # Check if MONGODB_VERSION is empty or set to "latest"
 if [ -z "$MONGODB_VERSION" ] || [ "$MONGODB_VERSION" == "latest" ]; then
-  # Fetch the content of the URL
-  MONGODB_VERSION=$(
-        curl -s "https://fastdl.mongodb.org/current.json" | jq -r ".versions[] | select(.development_release == false and (.downloads[] | select(.arch == \"$ARCH\" and (.target | startswith(\"debian\")) and (.packages[] | contains(\"$CURRENT_OS_CODENAME\")) and (.packages[] | contains(\"unstable\") | not) ))) | .version" | \
-        sort -V | \
-        tail -n 1 | \
-        awk -F. '{print $1 "." $2}'
-    )
-  export MONGODB_VERSION
-  echo "MONGODB_VERSION is set to the latest stable version: $MONGODB_VERSION" > /dev/stdout
+    # Function to get the latest stable MongoDB version for a given Debian codename
+    get_latest_mongodb_version() {
+        local BASE_URL="https://s3.amazonaws.com/repo.mongodb.org?list-type=2&prefix=apt/debian/dists/"
+        local URL="${BASE_URL}${CURRENT_OS_CODENAME}/mongodb-org/&delimiter=/"
+
+        local xml=$(curl -fsSL "$URL") || { echo "❌ Failed to download $URL" >&2; exit 1; }
+
+        local versions=$(printf '%s' "$xml" |
+            # Grab everything between <Prefix>…</Prefix>
+            grep -oP '(?<=<Prefix>)[^<]+' |
+            # Keep only the part that ends with a slash and looks like 4.x.y
+            grep -E '[0-9]+\.[0-9]+\.{0,1}[0-9]*' |
+            # Strip the trailing slash so we have just "4.2.16"
+            sed 's:/$::' | rev | cut -d/ -f1 | rev
+        )
+
+        MONGODB_VERSION=$(printf '%s\n' "$versions" | sort -V | tail -n1)
+    }
+
+    # Fetch the content of the URL
+    MONGODB_VERSION=$(get_latest_mongodb_version)
+
+    export MONGODB_VERSION
+    echo "MONGODB_VERSION is set to the latest stable version: $MONGODB_VERSION" > /dev/stdout
 else
-  echo "MONGODB_VERSION is already set to: $MONGODB_VERSION" > /dev/stdout
+    echo "MONGODB_VERSION is already set to: $MONGODB_VERSION" > /dev/stdout
 fi
 
 # Ensure the keyrings directory exists
@@ -131,11 +146,15 @@ else
 fi
 
 # MongoDB Repository
-echo "Adding MongoDB Repository" > /dev/stdout
-curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb.gpg
-echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
+if [ -z "$MONGODB_VERSION" ]; then
+    echo "No MongoDB version found for ${CURRENT_OS_CODENAME}, nothing to add."
+else
+    echo "Adding MongoDB Repository" > /dev/stdout
+    curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb.gpg
+    echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
 
-echo "Installing Database Clients" > /dev/stdout
+    echo "Installing Database Clients" > /dev/stdout
+fi
 
 # Update APT with the new repositories
 apt-get update
