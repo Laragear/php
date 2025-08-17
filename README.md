@@ -46,9 +46,9 @@ This image includes everything to run in your development environment and then s
 - [PHP Extension installer](https://github.com/mlocati/docker-php-extension-installer)
 - [FrankenPHP](https://frankenphp.dev/)¹
 - [RoadRunner](https://roadrunner.dev/)²
-- [Node](https://nodejs.org/)⁴, [Bun](https://bun.sh/) and [Deno](https://deno.com/)
+- [Node](https://nodejs.org/), [Bun](https://bun.sh/) and [Deno](https://deno.com/)
 - [NPM](https://www.npmjs.com/)³, [Yarn](https://yarnpkg.com/)³ and [PNPM](https://pnpm.io/)³
-- Database Clients for [MySQL](https://dev.mysql.com/downloads/shell/), [PostgreSQL](https://www.postgresql.org/docs/current/app-psql.html), [MariaDB](https://mariadb.com/docs/server/connect/clients/mariadb-client/), [SQLite](https://sqlite.org/cli.html) and [MongoDB](https://www.mongodb.com/docs/mongocli/)⁴.
+- Database Clients⁴ for [MySQL](https://dev.mysql.com/downloads/shell/), [PostgreSQL](https://www.postgresql.org/docs/current/app-psql.html), [MariaDB](https://mariadb.com/docs/server/connect/clients/mariadb-client/), [SQLite](https://sqlite.org/cli.html) and [MongoDB](https://www.mongodb.com/docs/mongocli/).
 - SSH Server (rootless)
 
 > [!NOTE]
@@ -67,8 +67,9 @@ Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP ver
 
 | Tags                 | Status    | PHP Version | Debian Version                                            |
 |----------------------|-----------|-------------|-----------------------------------------------------------|
-| `8.4` `latest` `1.x` | Supported | `8.4`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
-| `8.3`                | Supported | `8.3`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.5` (future)       | Supported | `8.5`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie) |
+| `8.4` `latest` `1.x` | Supported | `8.4`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie) |
+| `8.3`                | Supported | `8.3`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie) |
 | `8.2`                | Security  | `8.2`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
 | `8.1`                | Security  | `8.1`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
 | `8.0`                | EOL       | `8.0`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
