@@ -35,7 +35,7 @@ Acquire::AllowInsecureRepositories "true";
 Acquire::AllowDowngradeToInsecureRepositories "true";
 EOF
      chmod 644 "$CONFIG_FILE"
-     log "Created configuration file: $CONFIG_FILE"
+     echo "Created configuration file: $CONFIG_FILE"
 
      echo -e "WARNING: APT is now configured to allow unauthenticated packages!"
 else
