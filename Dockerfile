@@ -178,6 +178,10 @@ RUN \
     apt-get install -y --no-install-recommends nodejs && \
     # Enable Corepack  \
     if [ -f '/usr/bin/corepack' ]; then \
+        # Update Corepack \
+        echo 'Update Corepack' > /dev/stdout && \
+        npm install --global corepack@latest && \
+        # Enable NPM \
         echo 'Enabling Corepack' > /dev/stdout && \
         corepack enable && \
         # Enable NPM \
