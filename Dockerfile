@@ -108,7 +108,7 @@ RUN /var/fixes/set_old_repository.sh
 RUN \
     echo "Setting base utilities for the container" > /dev/stdout && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends --fix-missing \
       curl \
       ca-certificates \
       dnsutils \
