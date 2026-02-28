@@ -173,7 +173,7 @@ ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/relea
 RUN \
     # Install PHP Extensions \
     echo "Installing base PHP Extensions: $PHP_BASE_EXTENSIONS" > /dev/stdout && \
-    install-php-extensions $(echo $PHP_BASE_EXTENSIONS | sed 's/ /@latest /g;s/$/@latest/') \
+    install-php-extensions $(echo $PHP_BASE_EXTENSIONS | sed 's/ /@latest /g;s/$/@latest/')
 
 #
 #--------------------------------------------------------------------------
