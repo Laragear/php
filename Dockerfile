@@ -170,10 +170,31 @@ RUN /var/fixes/install_repositories_and_packages.sh
 # Add the PHP Extension installer
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN \
-    # Install PHP Extensions \
-    echo "Installing base PHP Extensions: $PHP_BASE_EXTENSIONS" > /dev/stdout && \
-    install-php-extensions $(echo $PHP_BASE_EXTENSIONS | sed 's/ /@latest /g;s/$/@latest/')
+RUN set -e; \
+    for EXT in $PHP_BASE_EXTENSIONS; do \
+        echo "Attempting to install $EXT..."; \
+        # Try the base extension first \
+        if install-php-extensions "$EXT"; then \
+            echo "✅ $EXT installed successfully."; \
+        else \
+            echo "⚠️ Standard install failed for $EXT. Trying pre-release suffixes..."; \
+            \
+            FOUND=false; \
+            for SUFFIX in "-rc" "-beta" "-alpha" "-devel" "-snapshot"; do \
+                echo "Testing $EXT$SUFFIX..."; \
+                if install-php-extensions "$EXT$SUFFIX"; then \
+                    echo "✅ Successfully installed $EXT as $EXT$SUFFIX"; \
+                    FOUND=true; \
+                    break; \
+                fi; \
+            done; \
+            \
+            if [ "$FOUND" = false ]; then \
+                echo "❌ Could not install $EXT with any known suffix."; \
+                exit 1; \
+            fi; \
+        fi; \
+    done
 
 #
 #--------------------------------------------------------------------------
