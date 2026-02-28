@@ -160,7 +160,7 @@ RUN /var/fixes/install_repositories_and_packages.sh
 # Add the PHP Extension installer
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN \
+RUN IPE_ALLOW_UNSTABLE=1 \
     # Install PHP Extensions \
     echo "Installing base PHP Extensions: $PHP_BASE_EXTENSIONS" > /dev/stdout && \
     install-php-extensions $PHP_BASE_EXTENSIONS
