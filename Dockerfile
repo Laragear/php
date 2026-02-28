@@ -160,10 +160,38 @@ RUN /var/fixes/install_repositories_and_packages.sh
 # Add the PHP Extension installer
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN IPE_ALLOW_UNSTABLE=1 \
-    # Install PHP Extensions \
-    echo "Installing base PHP Extensions: $PHP_BASE_EXTENSIONS" > /dev/stdout && \
-    install-php-extensions $PHP_BASE_EXTENSIONS
+RUN EXT_NAMES="$PHP_BASE_EXTENSIONS" && \
+    for EXT in $EXT_NAMES; do \
+        echo "--- Processing $EXT ---"; \
+        # 1. Attempt to install the stable version \
+        # We capture the output to a temporary file to scan for the PHP version error \
+        if ! install-php-extensions "$EXT" 2>/tmp/ipe_error; then \
+            ERROR_MSG=$(cat /tmp/ipe_error); \
+            echo "$ERROR_MSG" >&2; \
+            \
+            # 2. Check if the failure was due to PHP version incompatibility \
+            if echo "$ERROR_MSG" | grep -qi "requires PHP"; then \
+                echo "[Fallback] Stable $EXT failed PHP version check. Looking for latest (RC/Beta)..."; \
+                \
+                # 3. Fetch the absolute latest version from PECL \
+                LATEST=$(curl -s "https://pecl.php.net/rest/r/$EXT/allreleases.xml" | \
+                         sed -n 's/.*<v>\([^<]*\)<\/v>.*/\1/p' | head -n 1); \
+                \
+                if [ -n "$LATEST" ]; then \
+                    echo "[Fallback] Trying $EXT-$LATEST..."; \
+                    # 4. Final attempt: If this fails, the script exits and fails the build \
+                    install-php-extensions "$EXT-$LATEST"; \
+                else \
+                    echo "[Error] Could not find any releases for $EXT on PECL."; \
+                    exit 1; \
+                fi; \
+            else \
+                # If it failed for a different reason (compilation error, etc.), throw original error \
+                echo "[Error] $EXT failed for reasons other than PHP version."; \
+                exit 1; \
+            fi; \
+        fi; \
+    done
 
 #
 #--------------------------------------------------------------------------
