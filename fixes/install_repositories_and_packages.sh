@@ -120,7 +120,8 @@ echo "deb [signed-by=/etc/apt/keyrings/node.gpg] http://deb.nodesource.com/node_
 # Find if there is a distro version available for MySQL. If not, bail out.
 if curl -s --head "https://repo.mysql.com/apt/debian/dists/{$CURRENT_OS_CODENAME}/" | grep "200 OK" > /dev/null; then
     echo "Adding MySQL Repository" > /dev/stdout
-    curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg
+    PAST_YEAR=$(($(date +%Y) - 1))
+    curl -fsSL "https://repo.mysql.com/RPM-GPG-KEY-mysql-${PAST_YEAR}" | gpg --dearmor -o /usr/share/keyrings/mysql.gpg
     echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ ${CURRENT_OS_CODENAME} mysql-${MYSQL_REPO_VERSION}" > /etc/apt/sources.list.d/mysql.list
     PACKAGES="${PACKAGES:+$PACKAGES }mysql-shell"
 else
