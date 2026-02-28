@@ -170,46 +170,10 @@ RUN /var/fixes/install_repositories_and_packages.sh
 # Add the PHP Extension installer
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN set -e; \
-    PHP_VER=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;'); \
-    for EXT in $PHP_BASE_EXTENSIONS; do \
-        echo "Attempting to install $EXT..."; \
-        # Capture output to check for PHP version mismatch errors \
-        if ! OUTPUT=$(install-php-extensions "$EXT" 2>&1); then \
-            if echo "$OUTPUT" | grep -qiE "requires PHP|condition.*not met"; then \
-                echo "⚠️ Standard install failed for $EXT (PHP compatibility issue). Searching PECL for a match..." ; \
-                \
-                # Get versions from PECL (ordered newest to oldest) \
-                VERSIONS=$(pecl remote-info "$EXT" | grep -i "Releases" -A 50 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9-]*' || true); \
-                \
-                FOUND=false; \
-                for V in $VERSIONS; do \
-                    INFO=$(pecl remote-info "$EXT-$V"); \
-                    PHP_MIN=$(echo "$INFO" | grep -i "Required PHP Version" | awk '{print $NF}'); \
-                    PHP_MAX=$(echo "$INFO" | grep -i "Maximum PHP Version" | awk '{print $NF}'); \
-                    \
-                    # Use PHP to check if current version fits between MIN and MAX \
-                    if php -r "$cur = '$PHP_VER'; $min = '$PHP_MIN' === 'no' ? '0.0.0' : '$PHP_MIN'; $max = '$PHP_MAX' === 'no' ? '99.9.9' : '$PHP_MAX'; exit( (version_compare(\$cur, \$min, '>=') && version_compare(\$cur, \$max, '<=')) ? 0 : 1 );"; then \
-                        echo "✅ Found compatible version for $EXT: $V"; \
-                        install-php-extensions "$EXT-$V"; \
-                        FOUND=true; \
-                        break; \
-                    fi; \
-                done; \
-                \
-                if [ "$FOUND" = false ]; then \
-                    echo "❌ No compatible version of $EXT found on PECL for PHP $PHP_VER"; \
-                    exit 1; \
-                fi; \
-            else \
-                echo "❌ Installation of $EXT failed for non-version reasons:"; \
-                echo "$OUTPUT"; \
-                exit 1; \
-            fi; \
-        else \
-            echo "✅ $EXT installed successfully."; \
-        fi; \
-    done
+RUN \
+    # Install PHP Extensions \
+    echo "Installing base PHP Extensions: $PHP_BASE_EXTENSIONS" > /dev/stdout && \
+    install-php-extensions $(echo $PHP_BASE_EXTENSIONS | sed 's/ /@latest /g;s/$/@latest/') \
 
 #
 #--------------------------------------------------------------------------
