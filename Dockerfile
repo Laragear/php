@@ -108,27 +108,37 @@ RUN /var/fixes/set_old_repository.sh
 RUN \
     echo "Setting base utilities for the container" > /dev/stdout && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends --fix-missing \
-      curl \
-      ca-certificates \
-      dnsutils \
-      ffmpeg \
-      git \
-      gnupg \
-      gosu \
-      htop \
-      jq \
-      libcap2-bin \
-      libpng-dev \
-      librsvg2-bin \
-      lsb-release \
-      nano \
-      openssh-server \
-      python3 \
-      sudo \
-      unzip \
-      xz-utils \
-      zip && \
+    # Add a retry logic on install (up to 3 times) \
+    for attempt in 1 2 3; do \
+        apt-get install -y --no-install-recommends --fix-missing \
+            curl \
+            ca-certificates \
+            dnsutils \
+            ffmpeg \
+            git \
+            gnupg \
+            gosu \
+            htop \
+            jq \
+            libcap2-bin \
+            libpng-dev \
+            librsvg2-bin \
+            lsb-release \
+            nano \
+            openssh-server \
+            python3 \
+            sudo \
+            unzip \
+            xz-utils \
+            zip && break || \
+        if [ "$attempt" -lt 3 ]; then \
+            echo "Attempt $attempt failed! Retrying..."; \
+            sleep 2; \
+        else \
+            echo "Final attempt failed. Exiting."; \
+            exit 1; \
+        fi; \
+    done && \
     # Check if YQ is available. If not, don't install it. \
     if apt-get install --dry-run yq &> /dev/null; then \
       apt-get install -y --no-install-recommends yq; \
@@ -160,36 +170,44 @@ RUN /var/fixes/install_repositories_and_packages.sh
 # Add the PHP Extension installer
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN EXT_NAMES="$PHP_BASE_EXTENSIONS" && \
-    for EXT in $EXT_NAMES; do \
-        echo "--- Processing $EXT ---"; \
-        # 1. Attempt to install the stable version \
-        # We capture the output to a temporary file to scan for the PHP version error \
-        if ! install-php-extensions "$EXT" 2>/tmp/ipe_error; then \
-            ERROR_MSG=$(cat /tmp/ipe_error); \
-            echo "$ERROR_MSG" >&2; \
-            \
-            # 2. Check if the failure was due to PHP version incompatibility \
-            if echo "$ERROR_MSG" | grep -qi "requires PHP"; then \
-                echo "[Fallback] Stable $EXT failed PHP version check. Looking for latest (RC/Beta)..."; \
+RUN set -e; \
+    PHP_VER=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;'); \
+    for EXT in $PHP_BASE_EXTENSIONS; do \
+        echo "Attempting to install $EXT..."; \
+        # Capture output to check for PHP version mismatch errors \
+        if ! OUTPUT=$(install-php-extensions "$EXT" 2>&1); then \
+            if echo "$OUTPUT" | grep -qiE "requires PHP|condition.*not met"; then \
+                echo "⚠️ Standard install failed for $EXT (PHP compatibility issue). Searching PECL for a match..." ; \
                 \
-                # 3. Fetch the absolute latest version from PECL \
-                LATEST=$(curl -s "https://pecl.php.net/rest/r/$EXT/allreleases.xml" | \
-                         sed -n 's/.*<v>\([^<]*\)<\/v>.*/\1/p' | head -n 1); \
+                # Get versions from PECL (ordered newest to oldest) \
+                VERSIONS=$(pecl remote-info "$EXT" | grep -i "Releases" -A 50 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9-]*' || true); \
                 \
-                if [ -n "$LATEST" ]; then \
-                    echo "[Fallback] Trying $EXT-$LATEST..."; \
-                    # 4. Final attempt: If this fails, the script exits and fails the build \
-                    install-php-extensions "$EXT-$LATEST"; \
-                else \
-                    echo "[Error] Could not find any releases for $EXT on PECL."; \
+                FOUND=false; \
+                for V in $VERSIONS; do \
+                    INFO=$(pecl remote-info "$EXT-$V"); \
+                    PHP_MIN=$(echo "$INFO" | grep -i "Required PHP Version" | awk '{print $NF}'); \
+                    PHP_MAX=$(echo "$INFO" | grep -i "Maximum PHP Version" | awk '{print $NF}'); \
+                    \
+                    # Use PHP to check if current version fits between MIN and MAX \
+                    if php -r "$cur = '$PHP_VER'; $min = '$PHP_MIN' === 'no' ? '0.0.0' : '$PHP_MIN'; $max = '$PHP_MAX' === 'no' ? '99.9.9' : '$PHP_MAX'; exit( (version_compare(\$cur, \$min, '>=') && version_compare(\$cur, \$max, '<=')) ? 0 : 1 );"; then \
+                        echo "✅ Found compatible version for $EXT: $V"; \
+                        install-php-extensions "$EXT-$V"; \
+                        FOUND=true; \
+                        break; \
+                    fi; \
+                done; \
+                \
+                if [ "$FOUND" = false ]; then \
+                    echo "❌ No compatible version of $EXT found on PECL for PHP $PHP_VER"; \
                     exit 1; \
                 fi; \
             else \
-                # If it failed for a different reason (compilation error, etc.), throw original error \
-                echo "[Error] $EXT failed for reasons other than PHP version."; \
+                echo "❌ Installation of $EXT failed for non-version reasons:"; \
+                echo "$OUTPUT"; \
                 exit 1; \
             fi; \
+        else \
+            echo "✅ $EXT installed successfully."; \
         fi; \
     done
 
