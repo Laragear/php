@@ -32,7 +32,7 @@ ENV GROUP_ID=1000
 ENV HOME="/home/$USER"
 ENV PROJECT_PATH="/app"
 
-ARG PHP_BASE_EXTENSIONS="opcache pcntl pdo_mysql pdo_pgsql mongodb redis intl zip swoole xdebug"
+ARG PHP_BASE_EXTENSIONS="opcache pcntl pdo_mysql pdo_pgsql mongodb redis intl bcmath zip swoole xdebug"
 ARG PHP_EXTENSIONS=""
 ENV PHP_RUNTIME_EXTENSIONS=""
 
