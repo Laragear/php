@@ -14,7 +14,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   PHP_VERSIONS_FILE: "scripts/conf/versions.yml"
-  PHP_VERSION_MIN: "5.6"
+  PHP_VERSION_MIN: ${{ vars.PHP_VERSION_MIN != '' && vars.PHP_VERSION_MIN || '8.1' }}
   COMPOSER_VERSION: "latest"
   NODE_VERSION: "latest"
   FRANKENPHP_VERSION: "latest"
@@ -119,7 +119,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Prepare PHP versions for the matrix.
+      - name: Prepare PHP versions for the matrix
         run: ./scripts/get-php-versions.sh
 
       - name: Ensure our PHP Versions file exists.
@@ -144,7 +144,7 @@ jobs:
 
     strategy:
       matrix:
-        version: ${{fromJson(needs.setup-matrix.outputs.php-version-map-json)}}
+        version: ${{ fromJson(needs.setup-matrix.outputs.php-version-map-json) }}
 
     permissions:
       contents: read
