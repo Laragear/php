@@ -161,14 +161,6 @@ RUN \
 COPY ./fixes/install_repositories_and_packages.sh /var/fixes/install_repositories_and_packages.sh
 RUN /var/fixes/install_repositories_and_packages.sh
 
-#
-#--------------------------------------------------------------------------
-# Package Manager - Enable PHP base Extensions
-#--------------------------------------------------------------------------
-#
-
-RUN echo "Enabling PCNTL"; \
-    docker-php-ext-install pcntl
 
 #
 #--------------------------------------------------------------------------
@@ -204,6 +196,15 @@ RUN set -e; \
             fi; \
         fi; \
     done
+
+#
+#--------------------------------------------------------------------------
+# Package Manager - Enable PHP base Extensions
+#--------------------------------------------------------------------------
+#
+
+RUN echo "Enabling PCNTL"; \
+    docker-php-ext-install pcntl
 
 #
 #--------------------------------------------------------------------------
