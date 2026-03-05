@@ -32,7 +32,7 @@ ENV GROUP_ID=1000
 ENV HOME="/home/$USER"
 ENV PROJECT_PATH="/app"
 
-ARG PHP_BASE_EXTENSIONS="opcache pcntl pdo_mysql pdo_pgsql mongodb redis intl bcmath zip swoole xdebug"
+ARG PHP_BASE_EXTENSIONS="opcache pdo_mysql pdo_pgsql mongodb redis intl bcmath zip swoole xdebug"
 ARG PHP_EXTENSIONS=""
 ENV PHP_RUNTIME_EXTENSIONS=""
 
@@ -160,6 +160,15 @@ RUN \
 
 COPY ./fixes/install_repositories_and_packages.sh /var/fixes/install_repositories_and_packages.sh
 RUN /var/fixes/install_repositories_and_packages.sh
+
+#
+#--------------------------------------------------------------------------
+# Package Manager - Enable PHP base Extensions
+#--------------------------------------------------------------------------
+#
+
+RUN echo "Enabling PCNTL"; \
+    docker-php-ext-install pcntl
 
 #
 #--------------------------------------------------------------------------
