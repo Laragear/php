@@ -32,7 +32,7 @@ ENV GROUP_ID=1000
 ENV HOME="/home/$USER"
 ENV PROJECT_PATH="/app"
 
-ARG PHP_BASE_EXTENSIONS="opcache pdo_mysql pdo_pgsql mongodb redis intl bcmath zip swoole xdebug"
+ARG PHP_BASE_EXTENSIONS="opcache pdo_mysql pdo_pgsql mongodb redis intl bcmath zip xdebug"
 ARG PHP_EXTENSIONS=""
 ENV PHP_RUNTIME_EXTENSIONS=""
 
@@ -178,20 +178,27 @@ RUN set -e; \
         if install-php-extensions "$EXT"; then \
             echo "✅ $EXT installed successfully."; \
         else \
-            echo "⚠️ Standard install failed for $EXT. Trying pre-release suffixes..."; \
-            \
-            FOUND=false; \
-            for SUFFIX in "-rc" "-beta" "-alpha" "-devel" "-snapshot"; do \
-                echo "Testing $EXT$SUFFIX..."; \
-                if install-php-extensions "$EXT$SUFFIX"; then \
-                    echo "✅ Successfully installed $EXT as $EXT$SUFFIX"; \
-                    FOUND=true; \
-                    break; \
+            # Check if the failing extension is 'swoole' \
+            if [ "$EXT" = "swoole" ]; then \
+                echo "⚠️ Standard install failed for $EXT. Trying pre-release suffixes..."; \
+                \
+                FOUND=false; \
+                for SUFFIX in "-rc" "-beta" "-alpha" "-devel" "-snapshot"; do \
+                    echo "Testing $EXT$SUFFIX..."; \
+                    if install-php-extensions "$EXT$SUFFIX"; then \
+                        echo "✅ Successfully installed $EXT as $EXT$SUFFIX"; \
+                        FOUND=true; \
+                        break; \
+                    fi; \
+                done; \
+                \
+                if [ "$FOUND" = false ]; then \
+                    echo "❌ Could not install $EXT with any known suffix."; \
+                    exit 1; \
                 fi; \
-            done; \
-            \
-            if [ "$FOUND" = false ]; then \
-                echo "❌ Could not install $EXT with any known suffix."; \
+            else \
+                # Fail immediately for any other extension \
+                echo "❌ Failed to install $EXT. Suffixes are only permitted for 'swoole'."; \
                 exit 1; \
             fi; \
         fi; \
