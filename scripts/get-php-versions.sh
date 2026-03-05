@@ -45,6 +45,9 @@ rm -f "$PHP_VERSIONS_FILE"
 # Fetch the JSON data from the URL
 json_data=$(curl -s https://www.php.net/releases/index.php?json)
 
+echo "Retrieved releases from PHP:"
+echo $json_data
+
 # Extract and filter the major versions using jq
 filtered_versions=$( \
     echo "$json_data" | \
