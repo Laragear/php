@@ -169,6 +169,9 @@ fi
 echo "Installing Database Clients: $PACKAGES" > /dev/stdout
 
 # Update APT with the new repositories
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+apt-get -y autoremove
+apt clean
 apt-get update
 
 # Install the Database clients

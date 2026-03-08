@@ -69,6 +69,7 @@ RUN \
     if [ "$DEBIAN_VERSION_MAJOR" -gt 11 ]; then \
         echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
         echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
+        echo "Acquire::atp::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
         echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom; \
     fi
 
