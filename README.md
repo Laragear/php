@@ -67,11 +67,12 @@ Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP ver
 
 | Tags                 | Status    | PHP Version | Debian Version                                            |
 |----------------------|-----------|-------------|-----------------------------------------------------------|
-| `8.5` (future)       | Supported | `8.5`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie) |
-| `8.4` `latest` `1.x` | Supported | `8.4`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie) |
-| `8.3`                | Supported | `8.3`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie) |
+| `8.6` (development)  | Future    | `8.6`       | [`14.0` Trixie](https://wiki.debian.org/DebianForky)     |
+| `8.5` `latest` `1.x` | Supported | `8.5`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie)     |
+| `8.4`                | Supported | `8.4`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie)     |
+| `8.3`                | Security  | `8.3`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie)     |
 | `8.2`                | Security  | `8.2`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
-| `8.1`                | Security  | `8.1`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
+| `8.1`                | Stale     | `8.1`       | [`12.0` Bookworm](https://wiki.debian.org/DebianBookworm) |
 | `8.0`                | EOL       | `8.0`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
 | `7.4`                | EOL       | `7.4`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
 | `7.3`                | EOL       | `7.3`       | [`11.0` Bullseye](https://wiki.debian.org/DebianBullseye) |
@@ -82,7 +83,7 @@ Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP ver
 
 > [!WARNING]
 > 
-> [Unsupported PHP Versions](https://www.php.net/supported-versions.php) may not work properly. Be sure to always stay up to date.
+> [Unsupported PHP Versions](https://www.php.net/supported-versions.php) may not work at 100%. Be sure to always stay up to date.
 
 ### DevContainer
 
