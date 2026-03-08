@@ -67,7 +67,7 @@ Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP ver
 
 | Tags                 | Status    | PHP Version | Debian Version                                            |
 |----------------------|-----------|-------------|-----------------------------------------------------------|
-| `8.6` (development)  | Future    | `8.6`       | [`14.0` Trixie](https://wiki.debian.org/DebianForky)     |
+| `8.6` (development)  | Future    | `8.6`       | [`14.0` Forky](https://wiki.debian.org/DebianForky)       |
 | `8.5` `latest` `1.x` | Supported | `8.5`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie)     |
 | `8.4`                | Supported | `8.4`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie)     |
 | `8.3`                | Security  | `8.3`       | [`13.0` Trixie](https://wiki.debian.org/DebianTrixie)     |
