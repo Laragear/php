@@ -338,6 +338,11 @@ RUN \
       curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2.2; \
     fi
 
+# Enable plugins. It's a Docker Container, so it will only affect the container.
+RUN \
+   echo 'Enabling plugins in Composer...'; \
+   sudo -u $USER /usr/local/bin/composer global config --no-plugins allow-plugins true
+
 # Let's also add some common composer utilities globally.
 #
 # - `laravel/installer`:            It install Laravel for you.
@@ -347,10 +352,16 @@ RUN \
 #
 RUN \
     PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights" && \
+    # Append :@dev to each package name \
+    UPDATED_PACKAGES="" && \
+    for PKG in $PACKAGES; do UPDATED_PACKAGES="$UPDATED_PACKAGES ${PKG}:@dev"; done && \
+    PACKAGES=$(echo $UPDATED_PACKAGES | xargs) && \
+    \
     echo "Adding some useful Composer packages globally: $PACKAGES" > /dev/stdout && \
-    sudo -u $USER /usr/local/bin/composer --no-cache global require $PACKAGES && \
+    sudo -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable $PACKAGES && \
+    \
     # Clear composer cache and keep the image size lean \
-    composer clear-cache
+    sudo -u $USER /usr/local/bin/composer clear-cache
 
 # Finally, add Mago (Larastan + Pint + Linter) that runs using Rust instead of PHP, which is 50x faster.
 #
