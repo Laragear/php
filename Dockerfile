@@ -341,11 +341,12 @@ RUN \
 # Let's also add some common composer utilities globally.
 #
 # - `laravel/installer`:            It install Laravel for you.
+# - `laravel-zero/installer`:       It install Laravel Zero, a great CLI framework.
 # - `vildanbina/composer-upgrader`: Upgrade all your dependencies to their latest versions effortlessly.
 # - `nunomaduro/phpinsights`:       Instant analysis of your code quality, complexity, and architecture.
-# - `orchestra/testbench-cli`:      Run Laravel-specific tests outside of a full Laravel.
+#
 RUN \
-    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights orchestra/testbench-cli" && \
+    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights" && \
     echo "Adding some useful Composer packages globally: $PACKAGES" > /dev/stdout && \
     sudo -u $USER /usr/local/bin/composer --no-cache global require $PACKAGES && \
     # Clear composer cache and keep the image size lean \
@@ -355,7 +356,8 @@ RUN \
 #
 # For more info: https://mago.carthage.software/tools/formatter/configuration-reference
 #
-RUN if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);"; then \
+RUN \
+    if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);"; then \
       curl --proto '=https' --tlsv1.2 -sSf https://carthage.software/mago.sh | bash; \
     fi
 
@@ -382,7 +384,7 @@ RUN \
     setcap "cap_net_bind_service=+ep" /usr/local/bin/mago && \
     setcap "cap_net_bind_service=+ep" /usr/local/bin/composer && \
     setcap "cap_net_bind_service=+ep" /usr/local/bin/frankenphp && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/chromedriver \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/chromedriver
 
 #
 #--------------------------------------------------------------------------
