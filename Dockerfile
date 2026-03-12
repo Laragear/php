@@ -256,29 +256,6 @@ RUN \
 
 #
 #--------------------------------------------------------------------------
-# Runtime Fixes
-#--------------------------------------------------------------------------
-#
-
-# Ensure all runtimes have access to privileged ports belo 1024 (like 22, 80 or 443)
-RUN \
-    echo "Ensuring all runtimes have access to low-end port numbers" > /dev/stdout && \
-    # Old Node sometimes installs itself has "nodejs", so use that if "node" doesn't exists. \
-    if [ -f /usr/bin/node ]; then \
-      setcap "cap_net_bind_service=+ep" /usr/bin/node; \
-    elif [ -f /usr/bin/nodejs ]; then \
-      setcap "cap_net_bind_service=+ep" /usr/bin/nodejs; \
-    fi && \
-    setcap "cap_net_bind_service=+ep" /usr/sbin/sshd && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/rr && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/bun && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/php && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/deno && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/composer && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/frankenphp
-
-#
-#--------------------------------------------------------------------------
 # Install S6 Overlay
 #--------------------------------------------------------------------------
 #
@@ -362,15 +339,50 @@ RUN \
     fi
 
 # Let's also add some common composer utilities globally.
+#
+# - `laravel/installer`:            It install Laravel for you.
+# - `vildanbina/composer-upgrader`: Upgrade all your dependencies to their latest versions effortlessly.
+# - `nunomaduro/phpinsights`:       Instant analysis of your code quality, complexity, and architecture.
+# - `orchestra/testbench-cli`:      Run Laravel-specific tests outside of a full Laravel.
 RUN \
-    PACKAGES="phpunit/phpunit" && \
-    if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);"; then \
-      PACKAGES="$PACKAGES laravel/pint"; \
-    fi && \
-    echo "Adding some useful Composer packages globally" > /dev/stdout && \
+    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights orchestra/testbench-cli" && \
+    echo "Adding some useful Composer packages globally: $PACKAGES" > /dev/stdout && \
     sudo -u $USER /usr/local/bin/composer --no-cache global require $PACKAGES && \
     # Clear composer cache and keep the image size lean \
     composer clear-cache
+
+# Finally, add Mago (Larastan + Pint + Linter) that runs using Rust instead of PHP, which is 50x faster.
+#
+# For more info: https://mago.carthage.software/tools/formatter/configuration-reference
+#
+RUN if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);"; then \
+      curl --proto '=https' --tlsv1.2 -sSf https://carthage.software/mago.sh | bash; \
+    fi
+
+#
+#--------------------------------------------------------------------------
+# Runtime Fixes
+#--------------------------------------------------------------------------
+#
+
+# Ensure all runtimes have access to privileged ports belo 1024 (like 22, 80 or 443)
+RUN \
+    echo "Ensuring all runtimes have access to low-end port numbers" > /dev/stdout && \
+    # Old Node sometimes installs itself has "nodejs", so use that if "node" doesn't exists. \
+    if [ -f /usr/bin/node ]; then \
+      setcap "cap_net_bind_service=+ep" /usr/bin/node; \
+    elif [ -f /usr/bin/nodejs ]; then \
+      setcap "cap_net_bind_service=+ep" /usr/bin/nodejs; \
+    fi && \
+    setcap "cap_net_bind_service=+ep" /usr/sbin/sshd && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/rr && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/bun && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/php && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/deno && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/mago && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/composer && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/frankenphp && \
+    setcap "cap_net_bind_service=+ep" /usr/local/bin/chromedriver \
 
 #
 #--------------------------------------------------------------------------
