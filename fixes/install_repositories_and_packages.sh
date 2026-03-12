@@ -177,6 +177,11 @@ apt-get update
 # Install the Database clients
 apt-get install -y --no-install-recommends $PACKAGES
 
+# Clean installation leftovers
+apt-get -y autoremove
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Install Google Chrome for Testing
 wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
 apt-get update && \
@@ -192,8 +197,3 @@ unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
 mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
 chmod +x /usr/local/bin/chromedriver && \
 rm /tmp/chromedriver.zip /tmp/stable_version
-
-# Clean installation leftovers
-apt-get -y autoremove
-apt-get clean
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

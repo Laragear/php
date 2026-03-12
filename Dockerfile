@@ -379,23 +379,22 @@ RUN \
 #
 
 # Ensure all runtimes have access to privileged ports belo 1024 (like 22, 80 or 443)
+# Old Node sometimes installs itself as "nodejs", so use that if "node" doesn't exist.
 RUN \
-    echo "Ensuring all runtimes have access to low-end port numbers" > /dev/stdout && \
-    # Old Node sometimes installs itself has "nodejs", so use that if "node" doesn't exists. \
-    if [ -f /usr/bin/node ]; then \
-      setcap "cap_net_bind_service=+ep" /usr/bin/node; \
-    elif [ -f /usr/bin/nodejs ]; then \
-      setcap "cap_net_bind_service=+ep" /usr/bin/nodejs; \
-    fi && \
-    setcap "cap_net_bind_service=+ep" /usr/sbin/sshd && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/rr && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/bun && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/php && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/deno && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/mago && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/composer && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/frankenphp && \
-    setcap "cap_net_bind_service=+ep" /usr/local/bin/chromedriver
+    # Define the list of binaries to update \
+    BINARIES="/usr/sbin/sshd /usr/local/bin/rr /usr/local/bin/bun /usr/local/bin/php /usr/local/bin/deno /usr/local/bin/mago /usr/local/bin/composer /usr/local/bin/frankenphp /usr/local/bin/chromedriver" && \
+    \
+    # Handle the Node.js naming variance separately \
+    if [ -f /usr/bin/node ]; then BINARIES="$BINARIES /usr/bin/node"; \
+    elif [ -f /usr/bin/nodejs ]; then BINARIES="$BINARIES /usr/bin/nodejs"; fi && \
+    \
+    # Loop through the variable and apply capabilities if the file exists \
+    for bin in $BINARIES; do \
+        if [ -f "$bin" ]; then \
+            echo "Setting capabilities for $bin"; \
+            setcap "cap_net_bind_service=+ep" "$bin" || echo "Warning: Failed to set cap on $bin"; \
+        fi; \
+    done
 
 #
 #--------------------------------------------------------------------------
