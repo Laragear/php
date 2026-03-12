@@ -182,18 +182,18 @@ apt-get -y autoremove
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Google Chrome for Testing
-wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+# Download Chrome using curl (-L follows redirects, -o specifies output file)
+curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome-stable_current_amd64.deb && \
 apt-get update && \
 apt-get install -y ./google-chrome-stable_current_amd64.deb && \
 rm google-chrome-stable_current_amd64.deb
 
 # We use the "Chrome for Testing" API to ensure the driver matches the browser version.
 CHROME_VERSION="$(google-chrome --version | cut -d ' ' -f 3)" && \
-curl -sSL "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE" > /tmp/stable_version && \
-DRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/$(cat /tmp/stable_version)/linux64/chromedriver-linux64.zip" && \
-wget -q "$DRIVER_URL" -O /tmp/chromedriver.zip && \
+STABLE_VERSION=$(curl -sSL "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE") && \
+DRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/${STABLE_VERSION}/linux64/chromedriver-linux64.zip" && \
+curl -sSL "$DRIVER_URL" -o /tmp/chromedriver.zip && \
 unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
 mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
 chmod +x /usr/local/bin/chromedriver && \
-rm /tmp/chromedriver.zip /tmp/stable_version
+rm /tmp/chromedriver.zip
