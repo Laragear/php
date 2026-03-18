@@ -271,8 +271,11 @@ RUN /var/fixes/install_s6_overlay.sh
 # Copy the S6 Configuration files to the container.
 COPY etc /etc
 
+# Copy the default entrypoint
+COPY entrypoint.sh /entrypoint.sh
+
 # Set the entrypoint to S6 OVerlay custom INIT.
-ENTRYPOINT ["/init"]
+ENTRYPOINT ["/entrypoint.sh"]
 
 #
 #--------------------------------------------------------------------------
@@ -418,4 +421,4 @@ RUN /var/fixes/set_timezone.sh
 
 WORKDIR /app
 
-CMD ["/bin/bash"]
+CMD []
