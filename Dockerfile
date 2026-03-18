@@ -45,7 +45,7 @@ ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
 ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
 
-ENV PATH=$PATH:$COMPOSER_BIN_DIR
+ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
 
 ARG S6-VERSION="latest"
 
@@ -349,9 +349,10 @@ RUN \
 # - `laravel-zero/installer`:       It install Laravel Zero, a great CLI framework.
 # - `vildanbina/composer-upgrader`: Upgrade all your dependencies to their latest versions effortlessly.
 # - `nunomaduro/phpinsights`:       Instant analysis of your code quality, complexity, and architecture.
+# - `pestphp/pest-plugin`:          PLugin for composer
 #
 RUN \
-    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights" && \
+    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin pestphp/pest-plugin-browser" && \
     # Append :@dev to each package name \
     UPDATED_PACKAGES="" && \
     for PKG in $PACKAGES; do UPDATED_PACKAGES="$UPDATED_PACKAGES ${PKG}:@dev"; done && \
