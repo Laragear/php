@@ -179,7 +179,14 @@ else
                 gpg --dearmor -o /usr/share/keyrings/mongodb.gpg < /tmp/mongodb.asc
 
                 echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${CURRENT_VER} main" > /etc/apt/sources.list.d/mongodb.list
-                PACKAGES="${PACKAGES:+$PACKAGES }mongocli"
+
+                if [ "$MAJOR" -ge 5 ]; then
+                    NEW_PKG="mongodb-mongosh"
+                else
+                    NEW_PKG="mongocli"
+                fi
+
+                PACKAGES="${PACKAGES:+$PACKAGES }$NEW_PKG"
 
                 rm /tmp/mongodb.asc
                 break
