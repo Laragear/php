@@ -347,7 +347,7 @@ RUN \
 # Enable plugins. It's a Docker Container, so it will only affect the container.
 RUN \
    echo 'Enabling plugins in Composer...'; \
-   sudo -u $USER /usr/local/bin/composer global config --no-plugins allow-plugins true
+   sudo -E -u $USER /usr/local/bin/composer global config --no-plugins allow-plugins true
 
 # Let's also add some common composer utilities globally.
 #
@@ -365,10 +365,10 @@ RUN \
     PACKAGES=$(echo $UPDATED_PACKAGES | xargs) && \
     \
     echo "Adding some useful Composer packages globally: $PACKAGES" > /dev/stdout && \
-    sudo -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable $PACKAGES && \
+    sudo -E -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable $PACKAGES && \
     \
     # Clear composer cache and keep the image size lean \
-    sudo -u $USER /usr/local/bin/composer clear-cache
+    sudo -E -u $USER /usr/local/bin/composer clear-cache
 
 # Finally, add Mago (Larastan + Pint + Linter) that runs using Rust instead of PHP, which is 50x faster.
 #
