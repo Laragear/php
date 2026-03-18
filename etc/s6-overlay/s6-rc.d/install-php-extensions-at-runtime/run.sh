@@ -10,4 +10,4 @@ echo "Installing additional PHP extensions at runtime:" > /dev/stdout
 echo "$PHP_RUNTIME_EXTENSIONS" > /dev/stdout
 
 # Install the new extensions
-exec sudo install-php-extensions $PHP_RUNTIME_EXTENSIONS 2>&1
+exec install-php-extensions $PHP_RUNTIME_EXTENSIONS 2>&1
