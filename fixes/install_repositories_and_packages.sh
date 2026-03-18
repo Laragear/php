@@ -162,10 +162,38 @@ PACKAGES="${PACKAGES:+$PACKAGES }$POSTGRESQL_CLIENT"
 if [ -z "$MONGODB_VERSION" ]; then
     echo "No MongoDB version found for ${CURRENT_OS_CODENAME}, nothing to add."
 else
-    echo "Adding MongoDB Repository" > /dev/stdout
-    curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb.gpg
-    echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${MONGODB_VERSION} main" > /etc/apt/sources.list.d/mongodb.list
-    PACKAGES="${PACKAGES:+$PACKAGES }mongocli"
+    if [[ $MONGODB_VERSION =~ ^([0-9]+)\.([0-9]+) ]]; then
+        MAJOR=${BASH_REMATCH[1]}
+        MINOR=${BASH_REMATCH[2]}
+
+        # Loop backwards from the current Minor version to 0
+        while [ "$MINOR" -ge 0 ]; do
+            CURRENT_VER="${MAJOR}.${MINOR}"
+            URL="https://pgp.mongodb.com/server-${CURRENT_VER}.asc"
+
+            echo "Checking $URL"
+
+            # 1. Try to download to a temp file. 'if' protects 'set -e'.
+            if curl -fsSL "$URL" -o /tmp/mongodb.asc; then
+                # 2. Only if download succeeded, process the key
+                gpg --dearmor -o /usr/share/keyrings/mongodb.gpg < /tmp/mongodb.asc
+
+                echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/debian ${CURRENT_OS_CODENAME}/mongodb-org/${CURRENT_VER} main" > /etc/apt/sources.list.d/mongodb.list
+                PACKAGES="${PACKAGES:+$PACKAGES }mongocli"
+
+                rm /tmp/mongodb.asc
+                break
+            fi
+
+            echo "Version ${CURRENT_VER} not found, retrying..."
+            ((MINOR--)) || true
+       done
+    fi
+
+    if [ ! -f /etc/apt/sources.list.d/mongodb.list ]; then
+        echo "No valid MongoDB repository found."
+        exit 1
+    fi
 fi
 
 echo "Installing Database Clients: $PACKAGES" > /dev/stdout
