@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Retrieves the latest version number from Node.js API
 get_node_version() {
     curl -s https://nodejs.org/dist/index.json | jq -r "[.[] | select(.version | test(\"${version}\"))] | .[0].version" | sed -E 's/^v([0-9]+)\..*/\1/'
