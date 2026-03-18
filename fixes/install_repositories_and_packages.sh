@@ -36,7 +36,7 @@ else
 fi
 
 # Break out on EOL Debian since barely anything will work except from Node, barely.
-if grep -q "archive.debian.org" "/etc/apt/sources.list"; then
+if grep -rq "archive.debian.org" /etc/apt/sources.list*; then
     echo "Database tools are not supported on EOL Debian $CURRENT_OS_CODENAME. Install them separately." > /dev/stdout
     exit 0
 fi
