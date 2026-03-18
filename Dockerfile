@@ -352,7 +352,7 @@ RUN \
 # - `pestphp/pest-plugin`:          PLugin for composer
 #
 RUN \
-    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin pestphp/pest-plugin-browser" && \
+    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin" && \
     # Append :@dev to each package name \
     UPDATED_PACKAGES="" && \
     for PKG in $PACKAGES; do UPDATED_PACKAGES="$UPDATED_PACKAGES ${PKG}:@dev"; done && \
