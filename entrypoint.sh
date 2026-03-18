@@ -1,7 +1,7 @@
-#!/command/with-contenv bash
+#!/bin/sh
 
-if [ $# -gt 0 ]; then
-  exec "$@"
-else
+if [ $# -eq 0 ]; then
   exec /init
 fi
+
+exec /command/s6-setuidgid "${USER:-developer}" "$@"
