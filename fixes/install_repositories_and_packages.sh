@@ -144,7 +144,7 @@ fi
 POSTGRESQL_CLIENT="postgresql-client"
 
 # If the {CODENAME} repository exists, add it.
-if curl -s --head "http://apt.postgresql.org/pub/repos/apt/dists/${CURRENT_OS_CODENAME}-pgdg" | grep "200 OK" > /dev/null; then
+if curl -s --head "http://apt.postgresql.org/pub/repos/apt/dists/${CURRENT_OS_CODENAME}-pgdg/" | grep "200 OK" > /dev/null; then
     # PostgreSQL Repository
     echo "Adding PostgreSQL Repository" > /dev/stdout
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
