@@ -49,6 +49,9 @@ ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
 
 ARG S6-VERSION="latest"
 
+# Allow S6 to keep the environment variables.
+ENV S6_KEEP_ENV=1
+
 #
 #--------------------------------------------------------------------------
 # Default CLI interpreter
