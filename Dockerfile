@@ -44,7 +44,7 @@ ARG MONGODB_VERSION="latest"
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
 ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
-ENV COMPOSER_PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin laravel/pail rector/rector"
+ENV COMPOSER_PACKAGES="laravel/installer laravel-zero/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin laravel/pail rector/rector"
 ENV COMPOSER_RUNTIME_PACKAGES=""
 
 ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
