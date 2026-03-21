@@ -44,6 +44,8 @@ ARG MONGODB_VERSION="latest"
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
 ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
+ENV COMPOSER_PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin laravel/pail rector/rector"
+ENV COMPOSER_RUNTIME_PACKAGES=""
 
 ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
 
@@ -350,21 +352,13 @@ RUN \
    sudo -E -u $USER /usr/local/bin/composer global config --no-plugins allow-plugins true
 
 # Let's also add some common composer utilities globally.
-#
-# - `laravel/installer`:            It install Laravel for you.
-# - `laravel-zero/installer`:       It install Laravel Zero, a great CLI framework.
-# - `vildanbina/composer-upgrader`: Upgrade all your dependencies to their latest versions effortlessly.
-# - `nunomaduro/phpinsights`:       Instant analysis of your code quality, complexity, and architecture.
-# - `pestphp/pest-plugin`:          PLugin for composer
-#
 RUN \
-    PACKAGES="laravel/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin" && \
     # Append :@dev to each package name \
     UPDATED_PACKAGES="" && \
-    for PKG in $PACKAGES; do UPDATED_PACKAGES="$UPDATED_PACKAGES ${PKG}:@dev"; done && \
+    for PKG in $COMPOSER_PACKAGES; do UPDATED_PACKAGES="$UPDATED_PACKAGES ${PKG}:@dev"; done && \
     PACKAGES=$(echo $UPDATED_PACKAGES | xargs) && \
     \
-    echo "Adding some useful Composer packages globally: $PACKAGES" > /dev/stdout && \
+    echo "Adding some useful Composer packages globally: $COMPOSER_PACKAGES" > /dev/stdout && \
     sudo -E -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable $PACKAGES && \
     \
     # Clear composer cache and keep the image size lean \
