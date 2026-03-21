@@ -349,20 +349,44 @@ RUN \
 
 # Enable plugins. It's a Docker Container, so it will only affect the container.
 RUN \
-   echo 'Enabling plugins in Composer...'; \
+   echo 'Enabling plugins in Composer...' > /dev/stdout && \
    sudo -E -u $USER /usr/local/bin/composer global config --no-plugins allow-plugins true
+
+# Allow for dev packages but prefer stable
+RUN \
+   echo 'Enabling dev packages with stable preferred...' > /dev/stdout && \
+   sudo -E -u $USER /usr/local/bin/composer global config --no-plugins minimum-stability dev && \
+   sudo -E -u $USER /usr/local/bin/composer global config --no-plugins prefer-stable true
 
 # Let's also add some common composer utilities globally.
 RUN \
-    # Append :@dev to each package name \
-    UPDATED_PACKAGES="" && \
-    for PKG in $COMPOSER_PACKAGES; do UPDATED_PACKAGES="$UPDATED_PACKAGES ${PKG}:@dev"; done && \
-    PACKAGES=$(echo $UPDATED_PACKAGES | xargs) && \
+    # Separate Pail from the rest to avoid global failure on PHP 8.1 \
+    MAIN_PACKAGES="" && \
+    INSTALL_PAIL=false && \
+    for PKG in $COMPOSER_PACKAGES; do \
+        if [ "$PKG" = "laravel/pail" ]; then \
+            INSTALL_PAIL=true; \
+        else \
+            MAIN_PACKAGES="$MAIN_PACKAGES ${PKG}:*"; \
+        fi \
+    done && \
     \
-    echo "Adding some useful Composer packages globally: $COMPOSER_PACKAGES" > /dev/stdout && \
-    sudo -E -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable $PACKAGES && \
+    # 1. Install the compatible packages \
+    echo "Installing global packages: $MAIN_PACKAGES" > /dev/stdout && \
+    sudo -E -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable --with-all-dependencies $MAIN_PACKAGES && \
     \
-    # Clear composer cache and keep the image size lean \
+    # 2. Conditional install for Pail (only if PHP >= 8.2) \
+    if [ "$INSTALL_PAIL" = true ]; then \
+        echo "Checking PHP version for laravel/pail..." > /dev/stdout && \
+        if php -r "exit(version_compare(PHP_VERSION, '8.2.0', '>=') ? 0 : 1);"; then \
+            echo "PHP 8.2+ detected. Installing laravel/pail..." > /dev/stdout && \
+            sudo -E -u $USER /usr/local/bin/composer global require --no-cache --prefer-stable laravel/pail; \
+        else \
+            echo "Skipping laravel/pail: PHP version $(php -r 'echo PHP_VERSION;') is too old." > /dev/stderr; \
+        fi \
+    fi && \
+    \
+    # 3. Clean up \
     sudo -E -u $USER /usr/local/bin/composer clear-cache
 
 # Finally, add Mago (Larastan + Pint + Linter) that runs using Rust instead of PHP, which is 50x faster.
