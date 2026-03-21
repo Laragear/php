@@ -44,8 +44,9 @@ ARG MONGODB_VERSION="latest"
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
 ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
-ENV COMPOSER_PACKAGES="laravel/installer laravel-zero/installer vildanbina/composer-upgrader nunomaduro/phpinsights pestphp/pest-plugin laravel/pail rector/rector"
+ENV COMPOSER_PACKAGES="laravel/installer laravel-zero/installer vildanbina/composer-upgrader ion-bazan/composer-diff nunomaduro/phpinsights laravel/pail rector/rector ergebnis/composer-normalize maglnet/composer-require-checker icanhazstring/composer-unused psy/psysh deptrac/deptrac"
 ENV COMPOSER_RUNTIME_PACKAGES=""
+ENV MAGO_INSTALL="true"
 
 ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
 
@@ -369,8 +370,9 @@ RUN \
 # For more info: https://mago.carthage.software/tools/formatter/configuration-reference
 #
 RUN \
-    if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);"; then \
-      curl --proto '=https' --tlsv1.2 -sSf https://carthage.software/mago.sh | bash; \
+    if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);" && \
+    [[ "$MAGO_INSTALL" =~ ^(true|TRUE|1)$ ]]; then \
+        curl --proto '=https' --tlsv1.2 -sSf https://carthage.software/mago.sh | bash; \
     fi
 
 #

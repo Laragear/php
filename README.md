@@ -41,6 +41,7 @@ This PHP image for development is re-built every Tuesday and Thursday at 07:00 U
 This image includes everything to run in your development environment and then some.
 
 - [Composer](https://getcomposer.org/)
+- [Mago](https://mago.carthage.software/)
 - [XDebug](https://xdebug.org/)
 - [Swoole](https://swoole.com/)
 - [PHP Extension installer](https://github.com/mlocati/docker-php-extension-installer)
@@ -95,7 +96,7 @@ If you're using a DevContainer through a Docker Compose file, set the image to b
 services:
     
   app-dev:
-    image: laragear/php:8.3
+    image: laragear/php:8.5
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     # ...
@@ -131,7 +132,30 @@ Because these extensions are installed at runtime, the container may take a whil
 > 
 > For example, installing `sqlsrv` on `php:7.4` won't work, as it will install the latest `v5.12.0`. Instead, you will need to set the proper version that supports PHP 7.4, as `sqlsrv:5.10.1`. You can see supporting versions of each extension at [PECL](https://pecl.php.net/).
 
-## Composer Cache
+## Composer
+
+This container includes Composer, but also some useful composer plugins and global packages for your development convenience:
+
+* [`laravel/installer`](https://laravel.com/docs/13.x/installation#creating-a-laravel-project): A command-line tool that lets you create fresh Laravel projects instantly.
+* [`laravel-zero/installer`](https://laravel-zero.com/): The entry point for creating lightweight, modular command-line applications using the foundations of Laravel.
+* [`vildanbina/composer-upgrader`](https://github.com/vildanbina/composer-upgrader): Helps you interactively update your dependencies to their latest versions, making the chore of keeping `composer.json` current much easier.
+* [`ion-bazan/composer-diff`](https://github.com/IonBazan/composer-diff): Generates a clear, human-readable comparison of what changed in your `composer.lock` file after an update (e.g., which packages moved from version 1.1 to 1.2).
+* [`nunomaduro/phpinsights`](https://github.com/nunomaduro/phpinsights): A comprehensive analysis tool that gives you a "score" for your code quality, complexity, and architecture, along with tips to improve it.
+* [`laravel/pail`](https://laravel.com/docs/12.x/logging#tailing-log-messages-using-pail): A tool that allows you to easily "stream" your Laravel application logs directly to your terminal, making real-time debugging much cleaner.
+* [`rector/rector`](https://github.com/rectorphp/rector): An automated refactoring tool that can instantly upgrade your code from old PHP versions to new ones or fix deprecated code patterns across your whole project.
+* [`ergebnis/composer-normalize`](https://github.com/ergebnis/composer-normalize): Automatically cleans up and standardizes the structure of your `composer.json` file (sorting entries alphabetically, fixing whitespace, etc.).
+* [`maglnet/composer-require-checker`](https://github.com/maglnet/ComposerRequireChecker): Checks your code to make sure you aren't using a library that you forgot to actually list in your `composer.json` file.
+* [`icanhazstring/composer-unused`](https://github.com/composer-unused/composer-unused): Scans your project to find packages that are listed in your `composer.json` but are no longer actually being used in your code.
+* [`psy/psysh`](https://psysh.org/): A powerful interactive debugger and REPL (Read-Eval-Print Loop) for PHP that lets you test snippets of code and explore variables in real-time.
+* [`deptrac/deptrac`](https://deptrac.github.io/deptrac/): A tool that helps you visualize and enforce architectural rules, making sure (for example) that your database layer doesn't accidentally depend on your visual templates.
+
+All of these libraries and binaries are available globally inside the container.
+
+```shell
+docker run --rm -it laragear/php laravel new my-app
+```
+
+### Composer Cache
 
 The composer cache is located at `/composer/cache`. You can mount your host Composer Cache, which should make the dependencies installation and updating _faster_ if you're running a lot of Composer projects with a common cache.
 
@@ -139,6 +163,16 @@ The composer cache is located at `/composer/cache`. You can mount your host Comp
 docker run laragear/php \
   -v ~/.composer/cache:/composer/cache \
   composer install
+```
+
+## Mago
+
+Instead of installing PHP-CS-Fixer, Laravel Pint, and PHP_CodeSniffer, [Mago replaces all of these tools](https://mago.carthage.software/). What's best, it that was coded in Rust, so it's 80x–90x times faster.
+
+Mago is installed automatically and can be run in the container:
+
+```shell
+docker run --rm -it laragear/php mago analyze
 ```
 
 ## Custom User & Group ID
