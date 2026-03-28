@@ -391,16 +391,6 @@ RUN \
     # 3. Clean up \
     sudo -E -u $USER /usr/local/bin/composer clear-cache
 
-# Finally, add Mago (Larastan + Pint + Linter) that runs using Rust instead of PHP, which is 50x faster.
-#
-# For more info: https://mago.carthage.software/tools/formatter/configuration-reference
-#
-RUN \
-    if php -r "exit(version_compare(PHP_VERSION, '8.1.0', '>=') ? 0 : 1);" && \
-    [[ "$MAGO_INSTALL" =~ ^(true|TRUE|1)$ ]]; then \
-        curl --proto '=https' --tlsv1.2 -sSf https://carthage.software/mago.sh | bash; \
-    fi
-
 #
 #--------------------------------------------------------------------------
 # Runtime Fixes
