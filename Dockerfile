@@ -2,6 +2,7 @@ ARG PHP_VERSION="latest"
 ARG COMPOSER_VERSION="latest"
 ARG FRANKENPHP_VERSION="latest"
 ARG RR_VERSION="latest"
+ARG MAGO_VERSION="latest"
 ARG NODE_VERSION="latest"
 ARG DENO_VERSION="latest"
 ARG BUN_VERSION="latest"
@@ -18,6 +19,7 @@ FROM dunglas/frankenphp:${FRANKENPHP_VERSION} AS frankenphp-image
 FROM ghcr.io/roadrunner-server/roadrunner:${RR_VERSION} AS roadrunner-image
 FROM denoland/deno:${DENO_VERSION} AS deno-image
 FROM oven/bun:${BUN_VERSION} AS bun-image
+FROM ghcr.io/carthage-software/mago:${MAGO_VERSION} AS mago-image
 # Common images end
 
 FROM php:${PHP_VERSION}
@@ -46,7 +48,6 @@ ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
 ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
 ENV COMPOSER_PACKAGES="laravel/installer laravel-zero/installer vildanbina/composer-upgrader ion-bazan/composer-diff nunomaduro/phpinsights laravel/pail rector/rector ergebnis/composer-normalize maglnet/composer-require-checker icanhazstring/composer-unused psy/psysh deptrac/deptrac"
 ENV COMPOSER_RUNTIME_PACKAGES=""
-ENV MAGO_INSTALL="true"
 
 ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
 
@@ -94,6 +95,7 @@ COPY --from=roadrunner-image    /usr/bin/rr                 /usr/local/bin/rr
 COPY --from=deno-image          /usr/bin/deno               /usr/local/bin/deno
 COPY --from=bun-image           /usr/local/bin/bun          /usr/local/bin/bun
 COPY --from=composer-image      /usr/bin/composer           /usr/local/bin/composer
+COPY --from=mago-image          /usr/local/bin/mago         /usr/local/bin/mago
 
 
 #
