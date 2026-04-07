@@ -339,7 +339,7 @@ RUN \
 #
 
 RUN \
-    curl -fsSL https://github.com/AJenbo/phpantom_lsp/releases/$PHPANTOM_VERSION/download/phpantom_lsp-x86_64-unknown-linux-gnu.tar.gz | \
+    curl -fsSL "https://github.com/AJenbo/phpantom_lsp/releases/${PHPANTOM_VERSION}/download/phpantom_lsp-x86_64-unknown-linux-gnu.tar.gz" | \
     tar -xzf - -C /usr/local/bin --strip-components=1 && \
     chown $USER_ID:$GROUP_ID  /usr/bin/local/phantom_lsp
 
