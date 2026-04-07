@@ -46,7 +46,7 @@ ARG MONGODB_VERSION="latest"
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="$COMPOSER_HOME/cache"
 ENV COMPOSER_BIN_DIR="$COMPOSER_HOME/bin"
-ENV COMPOSER_PACKAGES="laravel/installer laravel-zero/installer vildanbina/composer-upgrader ion-bazan/composer-diff nunomaduro/phpinsights laravel/pail rector/rector ergebnis/composer-normalize maglnet/composer-require-checker icanhazstring/composer-unused psy/psysh deptrac/deptrac"
+ENV COMPOSER_PACKAGES="laravel/installer laravel-zero/installer vildanbina/composer-upgrader ion-bazan/composer-diff laravel/pail rector/rector ergebnis/composer-normalize maglnet/composer-require-checker icanhazstring/composer-unused psy/psysh deptrac/deptrac"
 ENV COMPOSER_RUNTIME_PACKAGES=""
 
 ENV PATH=$PATH:$COMPOSER_BIN_DIR:$COMPOSER_HOME/vendor/bin
