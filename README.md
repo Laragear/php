@@ -42,6 +42,7 @@ This image includes everything to run in your development environment and then s
 
 - [Composer](https://getcomposer.org/)
 - [Mago](https://mago.carthage.software/)
+- [PHPantom](https://github.com/AJenbo/phpantom_lsp/)
 - [XDebug](https://xdebug.org/)
 - [Swoole](https://swoole.com/)
 - [PHP Extension installer](https://github.com/mlocati/docker-php-extension-installer)
@@ -84,7 +85,7 @@ Laragear PHP is built for PHP 5.6 onwards. Debian versions depend on the PHP ver
 
 > [!WARNING]
 > 
-> [Unsupported PHP Versions](https://www.php.net/supported-versions.php) may not work at 100%. Be sure to always stay up to date.
+> [Unsupported PHP Versions](https://www.php.net/supported-versions.php) .
 
 ### DevContainer
 
@@ -135,7 +136,7 @@ Because these extensions are installed at runtime, the container may take a whil
 ## Composer
 
 This container includes Composer, but also some useful composer plugins and global packages for your development convenience:
-
+ 
 * [`laravel/installer`](https://laravel.com/docs/13.x/installation#creating-a-laravel-project): A command-line tool that lets you create fresh Laravel projects instantly.
 * [`laravel-zero/installer`](https://laravel-zero.com/): The entry point for creating lightweight, modular command-line applications using the foundations of Laravel.
 * [`vildanbina/composer-upgrader`](https://github.com/vildanbina/composer-upgrader): Helps you interactively update your dependencies to their latest versions, making the chore of keeping `composer.json` current much easier.

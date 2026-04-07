@@ -3,6 +3,7 @@ ARG COMPOSER_VERSION="latest"
 ARG FRANKENPHP_VERSION="latest"
 ARG RR_VERSION="latest"
 ARG MAGO_VERSION="latest"
+ARG PHPANTOM_VERSION="latest"
 ARG NODE_VERSION="latest"
 ARG DENO_VERSION="latest"
 ARG BUN_VERSION="latest"
@@ -333,6 +334,17 @@ RUN \
 
 #
 #--------------------------------------------------------------------------
+# Add PHPantom
+#--------------------------------------------------------------------------
+#
+
+RUN \
+    curl -fsSL https://github.com/AJenbo/phpantom_lsp/releases/latest/download/phpantom_lsp-x86_64-unknown-linux-gnu.tar.gz | \
+    tar -xzf - -C /usr/local/bin --strip-components=1 && \
+    chown $USER_ID:$GROUP_ID  /usr/bin/local/phantom_lsp
+
+#
+#--------------------------------------------------------------------------
 # Configure Composer
 #--------------------------------------------------------------------------
 #
@@ -397,7 +409,7 @@ RUN \
 #--------------------------------------------------------------------------
 #
 
-# Ensure all runtimes have access to privileged ports belo 1024 (like 22, 80 or 443)
+# Ensure all runtimes have access to privileged ports below 1024 (like 22, 80 or 443)
 # Old Node sometimes installs itself as "nodejs", so use that if "node" doesn't exist.
 RUN \
     # Define the list of binaries to update \
