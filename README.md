@@ -18,7 +18,7 @@ Your support allows me to keep this package free, up-to-date and maintainable.
 
 ## Requirements
 
-* Docker, Podman, Rancher, or any other OCI runtime.
+* Docker, Podman, Rancher or any other OCI runtime.
 
 ## Usage
 
@@ -141,7 +141,7 @@ This container includes Composer, but also some useful composer plugins and glob
 * [`laravel-zero/installer`](https://laravel-zero.com/): The entry point for creating lightweight, modular command-line applications using the foundations of Laravel.
 * [`vildanbina/composer-upgrader`](https://github.com/vildanbina/composer-upgrader): Helps you interactively update your dependencies to their latest versions, making the chore of keeping `composer.json` current much easier.
 * [`ion-bazan/composer-diff`](https://github.com/IonBazan/composer-diff): Generates a clear, human-readable comparison of what changed in your `composer.lock` file after an update (e.g., which packages moved from version 1.1 to 1.2).
-* [`halleck45/ast-metrics`](https://github.com/halleck45/ast-metrics): A comprehensive analysis tool that gives you a full report for your code quality, complexity, and architecture, as an HTML page or inside the terminal.
+* [`halleck45/ast-metrics`](https://github.com/halleck45/ast-metrics): A comprehensive analysis tool that gives you a full report for your code quality, complexity and architecture, as an HTML page or inside the terminal.
 * [`laravel/pail`](https://laravel.com/docs/12.x/logging#tailing-log-messages-using-pail): A tool that allows you to easily "stream" your Laravel application logs directly to your terminal, making real-time debugging much cleaner.
 * [`rector/rector`](https://github.com/rectorphp/rector): An automated refactoring tool that can instantly upgrade your code from old PHP versions to new ones or fix deprecated code patterns across your whole project.
 * [`ergebnis/composer-normalize`](https://github.com/ergebnis/composer-normalize): Automatically cleans up and standardizes the structure of your `composer.json` file (sorting entries alphabetically, fixing whitespace, etc.).
@@ -168,25 +168,36 @@ docker run laragear/php \
 
 ## Mago
 
-Instead of installing PHP-CS-Fixer, Laravel Pint, and PHP_CodeSniffer, [Mago replaces all of these tools](https://mago.carthage.software/). What's best, it that was coded in Rust, so it's 80x–90x times faster.
+Instead of installing PHP-CS-Fixer, Laravel Pint and PHP_CodeSniffer, [Mago replaces all of these tools](https://mago.carthage.software/). What's best, it that was coded in Rust, so it's 80x–90x times faster.
 
 Mago is installed automatically and can be run in the container:
 
 ```shell
-docker run --rm -it laragear/php mago analyze
+docker run --rm -it -v ./:/app laragear/php mago analyze
+```
+
+## PHPantom
+
+If you're using an LSP compatible code editor, like [Zed](https://zed.dev/), [Helix](https://helix-editor.com)[Neovim](https://neovim.io/) or [VSCode](https://code.visualstudio.com/), or even [GNOME Builder](https://apps.gnome.org/es/Builder/), you can use [PHPantom](https://www.github.com/AJenbo/phpantom_lsp) for _code intelligence_.
+
+PHPantom is installed automatically and can be run in the container:
+
+```shell
+docker run --rm -it -v ./:/app laragear/php phpantom_lsp
 ```
 
 ## Custom User & Group ID
 
 The default user for the container is `developer`, which is mapped as `1000:1000`.
 
-You may change the username, ID, and Group ID at build time using the `USER`, `USER_ID` and `GROUP_ID` arguments, respectively.
+You may change the username, ID and Group ID at build time using the `USER`, `USER_ID` and `GROUP_ID` arguments, respectively.
 
 ```shell
 docker run laragear/php \
   -e USER=vscode \
   -e USER_ID=1001 \
-  -e GROUP_ID=1001
+  -e GROUP_ID=1001 \
+  -u 1001:1001
 ```
 
 > [!WARNING]
