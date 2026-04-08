@@ -3,7 +3,6 @@ ARG COMPOSER_VERSION="latest"
 ARG FRANKENPHP_VERSION="latest"
 ARG RR_VERSION="latest"
 ARG MAGO_VERSION="latest"
-ARG PHPANTOM_VERSION="latest"
 ARG NODE_VERSION="latest"
 ARG DENO_VERSION="latest"
 ARG BUN_VERSION="latest"
@@ -339,7 +338,7 @@ RUN \
 #
 
 RUN \
-    curl -fsSL "https://github.com/AJenbo/phpantom_lsp/releases/$PHPANTOM_VERSION/download/phpantom_lsp-x86_64-unknown-linux-gnu.tar.gz" | \
+    curl -fsSL "https://github.com/AJenbo/phpantom_lsp/releases/latest/download/phpantom_lsp-x86_64-unknown-linux-gnu.tar.gz" | \
     tar -xzf - -C /usr/local/bin && \
     chown $USER_ID:$GROUP_ID  /usr/local/bin/phpantom_lsp
 
