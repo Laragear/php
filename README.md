@@ -1,3 +1,5 @@
+# Superseded by [Lerd](https://lerd.sh/), [Yerd](https://yerd.app/) and [Herd](https://herd.laravel.com).
+
 # PHP Container for development
 
 Swiss-knife Docker/Podman/Rancher container for PHP development, from PHP 5.6 to the latest versions.
